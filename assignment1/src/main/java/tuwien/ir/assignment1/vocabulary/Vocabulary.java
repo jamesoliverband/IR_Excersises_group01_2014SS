@@ -21,4 +21,11 @@ public interface Vocabulary {
 	 * @return
 	 */
 	String[] caseFolding(String[] s);
+	
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
+	String[] removingStopWords(String[] s, String[] stopWords);
 }
