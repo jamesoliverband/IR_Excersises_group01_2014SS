@@ -3,8 +3,6 @@
  */
 package tuwien.ir.assignment1.vocabulary;
 
-import java.util.List;
-
 /**
  * @author OliverS
  *
