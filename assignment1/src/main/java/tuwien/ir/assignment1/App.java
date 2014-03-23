@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package tuwien.ir.assignment1;
 
 /**
@@ -136,4 +135,3 @@ public class App
 		System.out.println("-sm(scoring method): \t TODO ");
 	}
 }
->>>>>>> ADD VocabularyImplTest; § does not get deleted.
