@@ -58,10 +58,38 @@ public class VocabularyImpl implements Vocabulary {
 		char []liEnding = {'c', 'd', 'e', 'g', 'h', 'k', 'm', 'n', 'r', 't'};
 		
 		String out = "";
-		
-		if (s.endsWith("s") || s.endsWith("'s") || s.endsWith("'s'")){
-			
+
+		/*
+		 * Step 0
+		 * Search for the longest among the suffixes, 
+		 * s 's 's' and remove if found. 
+		 */
+		int numOfRemovableCharacters = 0;
+		if(s.endsWith("'s'")){
+			numOfRemovableCharacters = 3;
 		}
+		else if( s.endsWith("'s") ){
+			numOfRemovableCharacters = 2;
+		}
+		else if (s.endsWith("s") ){
+			numOfRemovableCharacters = 1;
+		}
+
+		s = s.substring(0,s.length() - numOfRemovableCharacters);
+		
+		
+		/*
+		 *  Step 1a: Search for the longest among the following suffixes, 
+		 *  and perform the action indicated. 
+		 *  
+		 *  	sses replace by ss 
+		 *  	ied+   ies* replace by i if preceded by more than one letter, 
+		 *  				otherwise by ie (so ties -> tie, cries -> cri) 
+		 *  	s 			delete if the preceding word part contains a vowel 
+		 *  				not immediately before the s (so gas and this retain the s, gaps and kiwis lose it) 
+		 *  	us+   ss do nothing 
+		 */
+
 		
 		return out;
 	}
