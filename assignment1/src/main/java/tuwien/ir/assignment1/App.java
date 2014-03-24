@@ -1,7 +1,7 @@
 package tuwien.ir.assignment1;
 
 /**
- * Hello world!
+ * Hello world!!
  *
  */
 public class App 
