@@ -59,7 +59,9 @@ public class VocabularyImpl implements Vocabulary {
 		
 		String out = "";
 		
-		
+		if (s.endsWith("s") || s.endsWith("'s") || s.endsWith("'s'")){
+			
+		}
 		
 		return out;
 	}
