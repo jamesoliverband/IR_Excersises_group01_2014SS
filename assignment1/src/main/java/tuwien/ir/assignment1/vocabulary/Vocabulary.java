@@ -28,4 +28,10 @@ public interface Vocabulary {
 	 * @return
 	 */
 	String[] removingStopWords(String[] s, String[] stopWords);
+	
+	/**
+	 * using Porter algorithm
+	 * http://snowball.tartarus.org/algorithms/english/stemmer.html
+	 */
+	String stemming(String s);
 }

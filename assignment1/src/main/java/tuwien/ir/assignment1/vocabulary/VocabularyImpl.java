@@ -48,4 +48,19 @@ public class VocabularyImpl implements Vocabulary {
 		return s;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see tuwien.ir.assignment1.vocabulary.Vocabulary#stemming(java.lang.String)
+	 */
+	public String stemming(String s) {
+		char []vowels = {'a','e','i','o','u','y'};
+		String []doubleLetters = {"bb","dd","ff", "gg", "mm", "nn", "pp", "rr", "tt"};
+		char []liEnding = {'c', 'd', 'e', 'g', 'h', 'k', 'm', 'n', 'r', 't'};
+		
+		String out = "";
+		
+		
+		
+		return out;
+	}
 }
