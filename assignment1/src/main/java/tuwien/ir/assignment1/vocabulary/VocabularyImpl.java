@@ -71,7 +71,7 @@ public class VocabularyImpl implements Vocabulary {
 		else if( s.endsWith("'s") ){
 			numOfRemovableCharacters = 2;
 		}
-		else if (s.endsWith("s") ){
+		else if (s.endsWith("'") ){
 			numOfRemovableCharacters = 1;
 		}
 
@@ -89,8 +89,33 @@ public class VocabularyImpl implements Vocabulary {
 		 *  				not immediately before the s (so gas and this retain the s, gaps and kiwis lose it) 
 		 *  	us+   ss do nothing 
 		 */
-
-		
+		if(s.endsWith("sses")){
+			s = s.substring(0,s.length() - 4) + "ss";
+		}
+		else if(s.endsWith("ied")){
+			
+		}
+		else if(s.endsWith("s")){
+			if(s.charAt(s.length() -1) == 's');
+			else {
+				boolean toBeRemoved = true;
+				char c = s.charAt(s.length() -1);
+				for (int i = 0; i < vowels.length;i++){
+					if (c == vowels[i]){ // match
+						//no remove needed
+						toBeRemoved = false;
+						break;
+					}
+				}
+				
+				if (toBeRemoved){
+					s = s.substring(0,s.length() - 1) ;
+				}
+			}
+		}
+		else if(s.endsWith("ss")){ // NOP
+			
+		}
 		return out;
 	}
 }
