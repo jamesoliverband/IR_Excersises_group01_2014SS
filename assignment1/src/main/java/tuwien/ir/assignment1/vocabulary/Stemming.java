@@ -106,16 +106,13 @@ public class Stemming {
 			s = s.substring(0,s.length() - 3) + suffix;
 		}
 		else if(s.endsWith("s")){ // delete if the preceding word part contains a vowel not immediately before the s 
-			if(s.charAt(s.length() -1) == 's');
-			else {// TODO should be tested with kiwis
-				for (int i = 0; i < s.length()-1;i++){
+			for (int i = 0; i < s.length()-1;i++){
 					char c = s.charAt(i);
 					if (isVowel(c) ){
 						s = s.substring(0,s.length() - 1) ;
 						break;
 					}
 				}
-			}
 		}
 		else if(s.endsWith("ss")){ /*NOP*/ }
 		
@@ -141,7 +138,7 @@ public class Stemming {
 			}
 		}		
 		
-		return out;
+		return s;
 	}
 
 	/**
