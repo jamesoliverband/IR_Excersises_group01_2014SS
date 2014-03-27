@@ -5,7 +5,7 @@ package tuwien.ir.assignment1.vocabulary;
 
 /**
  * @author OliverS
- *
+ * 
  */
 public interface Vocabulary {
 	/**
@@ -23,7 +23,7 @@ public interface Vocabulary {
 	String[] caseFolding(String[] s);
 	
 	/**
-	 * 
+	 * http://www.ranks.nl/stopwords
 	 * @param s
 	 * @return
 	 */
