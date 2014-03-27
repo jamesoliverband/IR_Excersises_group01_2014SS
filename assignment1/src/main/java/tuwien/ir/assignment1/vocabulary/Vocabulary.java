@@ -27,7 +27,7 @@ public interface Vocabulary {
 	 * @param s
 	 * @return
 	 */
-	String[] removingStopWords(String[] s, String[] stopWords);
+	String[] removingStopWords(String[] s);
 	
 	/**
 	 * using Porter algorithm

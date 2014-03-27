@@ -20,10 +20,10 @@ import java.util.List;
  */
 public class VocabularyImpl implements Vocabulary {
 
-	private List<String> stopwords;
+	private List<String> stopWords;
 
 	public VocabularyImpl() {
-		stopwords = new ArrayList<String>();
+		stopWords = new ArrayList<String>();
 
 		try {
 			// Open the file that is the first
@@ -38,7 +38,7 @@ public class VocabularyImpl implements Vocabulary {
 			// Read File Line By Line
 			while ((strLine = br.readLine()) != null) {
 				// Print the content on the console
-				stopwords.add(strLine);
+				stopWords.add(strLine);
 				System.out.println(strLine);
 			}
 			// Close the input stream
@@ -82,10 +82,10 @@ public class VocabularyImpl implements Vocabulary {
 	 * tuwien.ir.assignment1.vocabulary.Vocabulary#removingStopWords(java.lang
 	 * .String[], java.lang.String[])
 	 */
-	public String[] removingStopWords(String[] s, String[] stopWords) {
+	public String[] removingStopWords(String[] s) {
 		for (int i = 0; i < s.length; i++) {
-			for (int r = 0; r < stopWords.length; r++) {
-				if (s[i] == stopWords[i]) {
+			for (String stop : stopWords) {
+				if (s[i] == stop) {
 					// TODO delete from list
 					s[i] = "";
 				}
