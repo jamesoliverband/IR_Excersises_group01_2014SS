@@ -214,7 +214,6 @@ public class Stemming {
 			if (isVowel(s.charAt(i)) && firstVowel == false){
 				firstVowel = true;
 			}else if (isVowel(s.charAt(i)) == false && firstVowel == true){
-				// TODO
 				start = i+1;
 				break;
 			}
