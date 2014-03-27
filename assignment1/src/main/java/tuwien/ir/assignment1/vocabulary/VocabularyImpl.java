@@ -3,13 +3,9 @@
  */
 package tuwien.ir.assignment1.vocabulary;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +21,10 @@ public class VocabularyImpl implements Vocabulary {
 	public VocabularyImpl() {
 		stopWords = new ArrayList<String>();
 
+		initStopWords();
+	}
+
+	private void initStopWords() {
 		try {
 			// Open the file that is the first
 			// command line parameter
@@ -67,8 +67,7 @@ public class VocabularyImpl implements Vocabulary {
 	 * [])
 	 */
 	public String[] caseFolding(String[] s) {
-
-		for (int i = 0; i < s.length; i++) {
+		for (int i = 0; i < s.length; i++) { // FIXME ' should not be affected by this method because its useful for stemming
 			s[i] = s[i].toLowerCase().replaceAll("\\p{Punct}", "");
 		}
 
@@ -106,5 +105,4 @@ public class VocabularyImpl implements Vocabulary {
 
 		return stemming.stemming(s);
 	}
-
 }

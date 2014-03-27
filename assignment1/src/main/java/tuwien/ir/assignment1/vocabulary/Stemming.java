@@ -155,4 +155,81 @@ public class Stemming {
 		
 		return false;
 	}
+	
+	/*
+	 	Defining R1 and R2
+		Most of the stemmers make use of at least one of the region definitions R1 and R2. They are defined as follows: 
+		
+		R1 is the region after the first non-vowel following a vowel, or is the null region at the end of the word if there is no such non-vowel. 
+		
+		R2 is the region after the first non-vowel following a vowel in R1, or is the null region at the end of the word if there is no such non-vowel. 
+		
+		The definition of vowel varies from language to language. In French, for example, é is a vowel, and in Italian i between two other vowels is not a vowel. The class of letters that constitute vowels is made clear in each stemmer. 
+		
+		Below, R1 and R2 are shown for a number of English words, 
+		   b   e   a   u   t   i   f   u   l
+		                     |<------------->|    R1
+		                             |<----->|    R2
+		
+		Letter t is the first non-vowel following a vowel in beautiful, so R1 is iful. In iful, the letter f is the first non-vowel following a vowel, so R2 is ul. 
+		   b   e   a   u   t   y
+		                     |<->|    R1
+		                       ->|<-  R2
+		
+		In beauty, the last letter y is classed as a vowel. Again, letter t is the first non-vowel following a vowel, so R1 is just the last letter, y. R1 contains no non-vowel, so R2 is the null region at the end of the word. 
+		   b   e   a   u
+		               ->|<-  R1
+		               ->|<-  R2
+		
+		In beau, R1 and R2 are both null. 
+		
+		Other examples: 
+		   a   n   i   m   a   d   v   e   r   s   i   o   n
+		         |<----------------------------------------->|    R1
+		                 |<--------------------------------->|    R2
+		
+		   s   p   r   i   n   k   l   e   d
+		                     |<------------->|    R1
+		                                   ->|<-  R2
+		
+		   e   u   c   h   a   r   i   s   t
+		             |<--------------------->|    R1
+		                         |<--------->|    R2
+		
+
+	 		TODO 
+	 */
+	
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
+	String getR1(String s){
+		String out = null; 
+		boolean firstVowel = false;
+		int start = 0; 
+		
+		for (int i = 0; i < s.length(); i++){
+			if (isVowel(s.charAt(i)) && firstVowel == false){
+				firstVowel = true;
+			}else if (isVowel(s.charAt(i)) == false && firstVowel == true){
+				// TODO
+				start = i+1;
+				break;
+			}
+		}
+
+		out = s.substring(start, s.length()); 
+		return out;
+	}
+	
+	/**
+	 * 
+	 * @param s should be R1
+	 * @return
+	 */
+	String getR2(String s){
+		return getR1(s);
+	}
 }
