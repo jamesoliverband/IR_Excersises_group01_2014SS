@@ -7,15 +7,13 @@ import java.util.HashMap;
 
 /**
  * @author OliverS
- *
+ * http://tartarus.org/~martin/PorterStemmer/java.txt
  */
 public class Stemming {
-	
 	private char []vowels = {'a','e','i','o','u','y'};
 	private String []doubleLetters = {"bb","dd","ff", "gg", "mm", "nn", "pp", "rr", "tt"};
 	private char []liEnding = {'c', 'd', 'e', 'g', 'h', 'k', 'm', 'n', 'r', 't'};
 	HashMap<String, String> exceptions ;
-	
 	
 	private String region1 = null;// R1 is the region after the first non-vowel following a vowel, 
 	// or the end of the word if there is no such non-vowel. 
@@ -146,8 +144,18 @@ public class Stemming {
 		return out;
 	}
 
+	/**
+	 * 
+	 * @param c
+	 * @return true if a vowel and false if not
+	 */
 	private boolean isVowel(char c) {
-		// TODO Auto-generated method stub
+		for(int i = 0; i < vowels.length; i++){
+			if (c == vowels[i]){
+				return true; 
+			}
+		}
+		
 		return false;
 	}
 }
