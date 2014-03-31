@@ -74,7 +74,8 @@ public class App {
 	@Argument private List<String> arguments = new ArrayList<String>();
 
 	public static void main(String[] args) throws IOException {
-		new App().doMain(args);
+		App app = new App();
+		app.doMain(args);
 		/*
 		 * // The CLI allows the user to enter provide // search parameters and
 		 * a file with a topic to search for. // bag-of-words or the bi-gram
@@ -87,6 +88,29 @@ public class App {
 		 * } }
 		 */
 		System.out.println("Exiting.");
+		
+		// either make index or search index
+		if (app.searchTopic != null) {	// search mode
+			// new index
+			//TODO
+			// load index
+			//TODO
+			// perform search
+			//TODO
+			// print results
+			//TODO
+		} else if (app.documentsDir == null) {	// index creation mode
+			// new index
+			//TODO
+			// get file list
+			//TODO
+			// index all documents
+			//TODO
+			// save index
+			//TODO
+			// print summary
+			//TODO
+		}
 	}
 
 	public void doMain(String[] args) throws IOException {
@@ -110,6 +134,8 @@ public class App {
 
 			if (searchTopic == null && documentsDir == null) {
 				throw new CmdLineException(parser, "One out of --serach-topic (perform search) or --docs (scan docs and generate index) must be given");
+			} else if (searchTopic != null && documentsDir != null) {
+				throw new CmdLineException(parser, "Only one out of --serach-topic (perform search) or --docs (scan docs and generate index) can be given");
 			}
 
 		} catch (CmdLineException e) {
@@ -144,6 +170,5 @@ public class App {
 		System.out.println("index format is " + indexFormat);
 		System.out.println("scoring method is " + scoringMethod);
 		System.out.println("--- End of options.");
-		
 	}
 }
