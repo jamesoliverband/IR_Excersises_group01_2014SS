@@ -66,8 +66,6 @@ public class Stemming {
 		if(exceptions.containsKey(s)){// search if it is an exception
 			return exceptions.get(s);
 		}
-		
-		String out = "";
 
 		/*
 		 * Step 0
@@ -127,7 +125,7 @@ public class Stemming {
 		 * 
 		 * eed   eedly+ replace by ee if in R1
 		 * ed   edly+   ing   ingly+ delete if the preceding word part contains a vowel, 
-		 * and after the deletion: TODO if the word ends at, bl or iz add e (so luxuriat -> luxuriate), 
+		 * and after the deletion: if the word ends at, bl or iz add e (so luxuriat -> luxuriate), 
 		 * or if the word ends with a double remove the last letter (so hopp -> hop), 
 		 * or if the word is short, add e (so hop -> hope) 
 		 */
@@ -157,7 +155,7 @@ public class Stemming {
 				s = s.substring(0, s.length()- 1);
 			}else if (s.charAt(s.length()) == s.charAt(s.length()-1)) { // or if the word ends with a double remove the last letter (so hopp -> hop)
 				s = s.substring(0, s.length()- 1);
-			}else if (isShort(s)){ // TODO if the word is short add ee
+			}else if (isShort(s)){ // if the word is short add e
 				s = s + "e";
 			}
 		}
@@ -173,9 +171,40 @@ public class Stemming {
 		}
 		
 		/*
-		 * TODO Step 2
+		 * Step 2
+		 * Search for the longest among the following suffixes, and, if found and in R1, perform the action indicated. 
+		 * tional:   replace by tion 
+		 * enci:   replace by ence 
+		 * anci:   replace by ance 
+		 * abli:   replace by able 
+		 * entli:   replace by ent 
+		 * izer   ization:   replace by ize 
+		 * TODO
+		 * ational   ation   ator:   replace by ate 
+		 * alism   aliti   alli:   replace by al 
+		 * fulness:   replace by ful 
+		 * ousli   ousness:   replace by ous 
+		 * iveness   iviti:   replace by ive 
+		 * biliti   bli+:   replace by ble ogi+:   replace by og if preceded by l fulli+:   replace by ful lessli+:   replace by less li+:   delete if preceded by a valid li-ending 
 		 * 
 		 */
+		region1 = getR1(s);
+		if (region1.endsWith("tional")){
+			s = s.substring(0, s.length()-2);
+		}else if (region1.endsWith("enci")){
+			s = s.substring(0, s.length()-1) + "e";
+		}else if (region1.endsWith("anci")){
+			s = s.substring(0, s.length()-1) + "e";
+		}else if (region1.endsWith("abli")){
+			s = s.substring(0, s.length()-1) + "e";
+		}else if (region1.endsWith("entli")){
+			s = s.substring(0, s.length()-2);
+		}else if (region1.endsWith("izer")){
+			s = s.substring(0, s.length()-1);
+		}else if (region1.endsWith("izeration")){
+			s = s.substring(0, s.length()-5) + "e";
+		}
+		
 		
 		/*
 		 * TODO Step 3
@@ -197,13 +226,14 @@ public class Stemming {
 	}
 
 	/**
-	 * A word is called short if it ends in a short syllable, and if R1 is null. 
+	 * 
+	 	A word is called short if it ends in a short syllable, and if R1 is null. 
 
- So bed, shed and shred are short words, bead, embed, beds are not short words. 
+ 		So bed, shed and shred are short words, bead, embed, beds are not short words. 
 
- An apostrophe (') may be regarded as a letter. (See  note on apostrophes in English.) 
+ 		An apostrophe (') may be regarded as a letter. (See  note on apostrophes in English.) 
 
- If the word has two letters or less, leave it as it is. 
+ 		If the word has two letters or less, leave it as it is. 
 
 	 * @param s
 	 * @return
