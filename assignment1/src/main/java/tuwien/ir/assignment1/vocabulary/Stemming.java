@@ -63,6 +63,10 @@ public class Stemming {
 			s = s.substring(1,s.length());
 		}
 				
+		if(exceptions.containsKey(s)){// search if it is an exception
+			return exceptions.get(s);
+		}
+		
 		String out = "";
 
 		/*
@@ -117,16 +121,46 @@ public class Stemming {
 		else if(s.endsWith("ss")){ /*NOP*/ }
 		
 		/*
-		 * Step 1b TODO
+		 * Step 1b 
 		 * Search for the longest among the following suffixes, 
 		 * and perform the action indicated. 
 		 * 
 		 * eed   eedly+ replace by ee if in R1
 		 * ed   edly+   ing   ingly+ delete if the preceding word part contains a vowel, 
-		 * and after the deletion: if the word ends at, bl or iz add e (so luxuriat -> luxuriate), 
+		 * and after the deletion: TODO if the word ends at, bl or iz add e (so luxuriat -> luxuriate), 
 		 * or if the word ends with a double remove the last letter (so hopp -> hop), 
 		 * or if the word is short, add e (so hop -> hope) 
 		 */
+		numOfRemovableCharacters = 0;
+		if (s.endsWith("eedly")){
+			s = s.substring(0, s.length()- 5) + "ee";
+		}else if(s.endsWith("eed")){
+			s = s.substring(0, s.length()- 2) + "ee";
+			numOfRemovableCharacters = 3;
+		}else{
+			if (s.endsWith("ed")){
+				numOfRemovableCharacters = 2;
+			}else if (s.endsWith("edly")){
+				numOfRemovableCharacters = 4;
+			}else if (s.endsWith("ing")){
+				numOfRemovableCharacters = 3;
+			}else if (s.endsWith("ingly")){
+				numOfRemovableCharacters = 5;
+			}
+			
+			s = s.substring(0, s.length()- numOfRemovableCharacters);
+			
+			// if the word ends at, bl or iz add e
+			if (s.endsWith("at")||s.endsWith("bl")||s.endsWith("iz")){
+				s = s.substring(0, s.length()- 2);
+			}else if (s.endsWith("e")){
+				s = s.substring(0, s.length()- 1);
+			}else if (s.charAt(s.length()) == s.charAt(s.length()-1)) { // or if the word ends with a double remove the last letter (so hopp -> hop)
+				s = s.substring(0, s.length()- 1);
+			}else if (isShort(s)){ // TODO if the word is short add ee
+				s = s + "e";
+			}
+		}
 		
 		/*
 		 * Step 1c
@@ -136,9 +170,68 @@ public class Stemming {
 			if (!isVowel(s.charAt(s.length()-1))){
 				s = s.substring(0,s.length() - 1) + "i";
 			}
-		}		
+		}
+		
+		/*
+		 * TODO Step 2
+		 * 
+		 */
+		
+		/*
+		 * TODO Step 3
+		 * 
+		 */
+		
+		/*
+		 * TODO Step 4
+		 * 
+		 */
+		
+		/*
+		 * TODO Step 5
+		 * 
+		 */
+		
 		
 		return s;
+	}
+
+	/**
+	 * A word is called short if it ends in a short syllable, and if R1 is null. 
+
+ So bed, shed and shred are short words, bead, embed, beds are not short words. 
+
+ An apostrophe (') may be regarded as a letter. (See  note on apostrophes in English.) 
+
+ If the word has two letters or less, leave it as it is. 
+
+	 * @param s
+	 * @return
+	 */
+	private boolean isShort(String s) {
+		if(getR1(s) == null && hasShortSyllable(s)){
+			return true;
+		}else return false;
+	}
+
+	/**
+	 * (a) a vowel followed by a non-vowel other than w, x or Y and preceded by a non-vowel, or * 
+	 * (b) a vowel at the beginning of the word followed by a non-vowel. 
+	 * @param s
+	 * @return
+	 */
+	private boolean hasShortSyllable(String s) {
+		if (isVowel(s.charAt(0))&& !isVowel(s.charAt(1))){
+			return true;
+		}
+			
+		for (int i = 0; i < s.length()-2; i++){
+			if (isVowel(s.charAt(i)) && isVowel(s.charAt(i+1)) && !isVowel(s.charAt(i+2))){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
@@ -195,9 +288,6 @@ public class Stemming {
 		   e   u   c   h   a   r   i   s   t
 		             |<--------------------->|    R1
 		                         |<--------->|    R2
-		
-
-	 		TODO 
 	 */
 	
 	/**
