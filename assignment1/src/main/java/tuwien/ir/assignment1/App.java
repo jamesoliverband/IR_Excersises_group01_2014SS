@@ -5,7 +5,6 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.kohsuke.args4j.spi.BooleanOptionHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +13,6 @@ import java.util.List;
 
 /**
  * Main application class of assignment.
- * 
  */
 public class App {
 	/*
@@ -25,11 +23,17 @@ public class App {
 		BOW, BIG
 	}
 
-	@Option(name = "-i", aliases = { "--index-format" }, usage = "index format", required = true)
+	@Option(name = "-f", aliases = { "--index-format" }, usage = "index format", required = true)
 	public IndexFormat indexFormat = IndexFormat.BOW;
 
-	@Option(name = "-f", aliases = { "--file" }, usage = "input filename", required = true, metaVar = "INPUT")
+	@Option(name = "-i", aliases = { "--index" }, usage = "index filename", required = true, metaVar = "INPUT", depends = { "-f" })
 	public File inputFile = new File("in.txt");
+
+	@Option(name = "-d", aliases = { "--docs" }, usage = "documents directory", required = false, metaVar = "DOCS", depends = { "-i" })
+	public File documentsDir = new File("20_newsgroups_subset/");
+
+	@Option(name = "-s", aliases = { "--search-topic" }, usage = "search topic", required = false, metaVar = "TOPIC", depends =  { "-i" })
+	public File searchTopic = new File("topics/topic1");
 
 	/*
 	 * M1 = TODO
@@ -83,15 +87,6 @@ public class App {
 		 * } }
 		 */
 		System.out.println("Exiting.");
-
-	}
-
-	private static void printHelp() {
-		System.out.println("Help\n----------");
-		System.out.print("Your input should be looking like this: ");
-		System.out.println("assignment1 -i bow -f file.txt\n");
-		System.out.println("-i(index): \tbow ...bag of words index\n\t\tbig ...bigram-index\n");
-		System.out.println("-sm(scoring method): \t TODO ");
 	}
 
 	public void doMain(String[] args) throws IOException {
@@ -112,6 +107,10 @@ public class App {
 			// if enough arguments are given.
 			//if (arguments.isEmpty())
 			//	throw new CmdLineException(parser, "No argument is given");
+
+			if (searchTopic == null && documentsDir == null) {
+				throw new CmdLineException(parser, "One out of --serach-topic (perform search) or --docs (scan docs and generate index) must be given");
+			}
 
 		} catch (CmdLineException e) {
 			// if there's a problem in the command line,
@@ -141,9 +140,10 @@ public class App {
 		 * arguments) System.out.println(s);
 		 */
 		System.out.println("--- Begin cmdline options:");
-		System.out.println("input file is " + inputFile);
+		System.out.println("index file is " + inputFile);
 		System.out.println("index format is " + indexFormat);
 		System.out.println("scoring method is " + scoringMethod);
 		System.out.println("--- End of options.");
+		
 	}
 }
