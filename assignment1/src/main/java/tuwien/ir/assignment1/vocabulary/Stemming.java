@@ -3,7 +3,9 @@
  */
 package tuwien.ir.assignment1.vocabulary;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author OliverS
@@ -179,13 +181,17 @@ public class Stemming {
 		 * abli:   replace by able 
 		 * entli:   replace by ent 
 		 * izer   ization:   replace by ize 
-		 * TODO
 		 * ational   ation   ator:   replace by ate 
 		 * alism   aliti   alli:   replace by al 
+		 * TODO
 		 * fulness:   replace by ful 
 		 * ousli   ousness:   replace by ous 
 		 * iveness   iviti:   replace by ive 
-		 * biliti   bli+:   replace by ble ogi+:   replace by og if preceded by l fulli+:   replace by ful lessli+:   replace by less li+:   delete if preceded by a valid li-ending 
+		 * biliti   bli+:   replace by ble 
+		 * ogi+:   replace by og if preceded by l 
+		 * fulli+:   replace by ful 
+		 * lessli+:   replace by less 
+		 * li+:   delete if preceded by a valid li-ending 
 		 * 
 		 */
 		region1 = getR1(s);
@@ -203,26 +209,129 @@ public class Stemming {
 			s = s.substring(0, s.length()-1);
 		}else if (region1.endsWith("izeration")){
 			s = s.substring(0, s.length()-5) + "e";
+		}else if (region1.endsWith("ational")){
+			s = s.substring(0, s.length()-7) + "ate";
+		}else if (region1.endsWith("ation")){
+			s = s.substring(0, s.length()-5) + "ate";
+		}else if (region1.endsWith("ator")){
+			s = s.substring(0, s.length()-4) + "ate";
+		}else if (region1.endsWith("alism")){
+			s = s.substring(0, s.length()-5) + "al";
+		}else if (region1.endsWith("aliti")){
+			s = s.substring(0, s.length()-5) + "al";
+		}else if (region1.endsWith("alli")){
+			s = s.substring(0, s.length()-4) + "al";
+		}else if (region1.endsWith("fulness")){
+			s = s.substring(0, s.length()-4) + "ful";
+		}else if (region1.endsWith("ousli")){
+			s = s.substring(0, s.length()-5) + "ous";
+		}else if (region1.endsWith("ousness")){
+			s = s.substring(0, s.length()-7) + "ous";
+		}else if (region1.endsWith("iveness")){
+			s = s.substring(0, s.length()-7) + "ive";
+		}else if (region1.endsWith("iviti")){
+			s = s.substring(0, s.length()-5) + "ive";
+		}else if (region1.endsWith("biliti")){
+			s = s.substring(0, s.length()-6) + "ble";
+		}else if (region1.endsWith("bli")){
+			s = s.substring(0, s.length()-3) + "ble";
+		}else if (region1.endsWith("ogi")){ // TODO replace by og if preceded by l 
+			s = s.substring(0, s.length()-3) + "ble";
 		}
 		
+		/*
+		 * Step 3
+		 * 
+			Search for the longest among the following suffixes, and, if found and in R1, perform the action indicated. 
+	
+			tional+:   replace by tion 
+			ational+:   replace by ate 
+			alize:   replace by al 
+			icate   iciti   ical:   replace by ic 
+			ful   ness:   delete 
+			ative*:   delete if in R2 
+		 */
+		if (s.endsWith("tional")){
+			s = s.substring(0, s.length()-6) + "tion";
+		}else if (s.endsWith("ational")){
+			s = s.substring(0, s.length()-6) + "ate";
+		}else if (s.endsWith("alize")){
+			s = s.substring(0, s.length()-6) + "al";
+		}else if (s.endsWith("icate")){
+			s = s.substring(0, s.length()-6) + "ic";
+		}else if (s.endsWith("iciti")){
+			s = s.substring(0, s.length()-6) + "ic";
+		}else if (s.endsWith("ical")){
+			s = s.substring(0, s.length()-6) + "ic";
+		}else if (s.endsWith("ful")){
+			s = s.substring(0, s.length()-3);
+		}else if (s.endsWith("ness")){
+			s = s.substring(0, s.length()-4);
+		}else if (s.endsWith("ness")){
+			s = s.substring(0, s.length()-4);
+		}else if (getR2(s).endsWith("ative")){
+			s = s.substring(0, s.length()-5);
+		}
 		
 		/*
-		 * TODO Step 3
-		 * 
-		 */
-		
-		/*
-		 * TODO Step 4
-		 * 
-		 */
-		
+		 * Step 4
+		 * 		 
+			Search for the longest among the following suffixes, and, if found and in R2, perform the action indicated. 
+
+			al   ance   ence   er   ic   able   ible   ant   ement   ment   ent   ism   ate   iti   ous   ive   ize delete 
+			ion delete if preceded by s or t 
+		*/
+		region2 = getR2(s);
+		if (region2 != null){
+			List<String> step4 = initStep4();
+			boolean flag = false;
+			
+			for(String step4Tmp : step4){
+				if (region2.endsWith(step4Tmp)){
+					s = s.substring(0, s.length() - step4Tmp.length());
+					flag = true;
+					break;
+				}
+			}	
+			
+			if (flag == false && (region2.endsWith("sion") && region2.endsWith("tion"))){
+				s = s.substring(0, s.length() - 4);
+			}
+		}
+					
 		/*
 		 * TODO Step 5
 		 * 
 		 */
 		
 		
+		
 		return s;
+	}
+
+	/**
+	 * @return
+	 */
+	private List<String> initStep4() {
+		List<String> step4 = new ArrayList<String>();
+		step4.add("al");
+		step4.add("ance");
+		step4.add("ence");
+		step4.add("er");
+		step4.add("ic");
+		step4.add("able");
+		step4.add("ible");
+		step4.add("ant");
+		step4.add("ement");
+		step4.add("ment");
+		step4.add("ent");
+		step4.add("ism");
+		step4.add("ate");
+		step4.add("iti");
+		step4.add("ous");
+		step4.add("ive");
+		step4.add("ize");
+		return step4;
 	}
 
 	/**
