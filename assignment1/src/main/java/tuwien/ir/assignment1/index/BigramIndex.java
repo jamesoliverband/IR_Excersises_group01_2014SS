@@ -27,4 +27,8 @@ public class BigramIndex implements Index {
 		
 	}
 
+	public String toString() {
+		//TODO summary of contents
+		return null;
+	}
 }

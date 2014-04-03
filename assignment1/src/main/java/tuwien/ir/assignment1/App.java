@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -52,7 +51,8 @@ public class App {
 	public String sarchRunName = null;
 
 	/*
-	 * M1 = TODO M2 = TODO
+	 * M1 = TODO
+	 * M2 = TODO
 	 */
 	enum ScoringMethod {
 		M1, M2
@@ -89,23 +89,17 @@ public class App {
 	@Argument
 	private List<String> arguments = new ArrayList<String>();
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		App app = new App();
 		app.doMain(args);
 		/*
-		 * // The CLI allows the user to enter provide // search parameters and
-		 * a file with a topic to search for. // bag-of-words or the bi-gram
-		 * index, scoring method)
-		 * 
-		 * if (args.length == 0){ printHelp(); }else{ // TODO run through the
-		 * parameters and choose the appropriate action for(int i = 0; i <
-		 * args.length ;i++){ String s = args[i];
-		 * 
-		 * } }
-		 */
+			The CLI allows the user to enter provide
+			search parameters and
+			a file with a topic to search for. // bag-of-words or the bi-gram
+			index, scoring method)
+		*/
 		System.out.println("Exiting.");
-
-		// new index depending with correct type, according to cmdline
+		// make new index depending with correct type, according to command-line
 		Index index = null;
 		switch (app.indexFormat) {
 		case BOW:
@@ -115,8 +109,7 @@ public class App {
 			index = new BigramIndex();
 			break;
 		default:
-			System.out
-					.println("ERROR: initialize index: Unrecognized index format. Exiting.");
+			System.out.println("ERROR: initialize index: Unrecognized index format. Exiting.");
 			System.exit(1);
 		}
 		// either make index or search index
@@ -153,10 +146,11 @@ public class App {
 				// generate documentId
 				String lastpath = file.getParentFile().getName();
 				String filename = file.getName();
-				String documentId = lastpath + file.pathSeparator + filename;
+				String documentId = lastpath + File.pathSeparator + filename;
 				// index the document
 				//System.out.println(file.getAbsolutePath());
 				index.indexDocument(file, documentId);
+				//break;	//TODO only first file
 			}
 			// save index
 			index.save(app.indexFile.toPath());
