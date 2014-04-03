@@ -1,10 +1,6 @@
 package tuwien.ir.assignment1.index;
 
-import java.nio.file.Paths;
-import java.nio.file.Path;
-
 public class SearchResult {
-	private Path documentPath;
 	private String topicId;
 	private String Q0 = "Q0";
 	private String documentId;
@@ -12,8 +8,8 @@ public class SearchResult {
 	private Double score;
 	private String runName;
 	
-	public SearchResult(String documentPath, String topicId, int rank, Double score, String runName) {
-		this.documentPath = Paths.get(documentPath);
+	public SearchResult(String documentId, String topicId, int rank, Double score, String runName) {
+		this.documentId = documentId;
 		this.topicId = topicId;
 		this.rank = rank;
 		this.score = score;
@@ -21,9 +17,6 @@ public class SearchResult {
 	}
 	
 	public String toString() {
-		String lastDir = "LOL";	//TODO split path, extract actual info
-		String fileName = "LOL";	//TODO
-		String documentId = lastDir + "/" + fileName;
-		return String.format("%s %s %s %d %.8f %s", this.topicId, this.Q0, documentId, rank, score, runName);
+		return String.format("%s %s %s %d %.8f %s", this.topicId, this.Q0, this.documentId, this.rank, this.score, this.runName);
 	}
 }

@@ -13,7 +13,7 @@ import tuwien.ir.assignment1.search.Search;
 
 public interface Index {
 	public void indexDocument(File document, String documentId) throws IOException;
-	public ArrayList<SearchResult> getSimilarDocuments(File searchTopic, Search scoringClass, String topicId, String runName);
+	public ArrayList<SearchResult> getSimilarDocuments(File searchTopic, Search scoringClass, String topicId, String runName) throws IOException;
 	public void load(File indexFile) throws FileNotFoundException, ClassNotFoundException, IOException;
 	public void save(Path indexFile) throws FileNotFoundException, IOException;
 	public String toString();

@@ -11,8 +11,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import tuwien.ir.assignment1.search.Search;
 import tuwien.ir.assignment1.vocabulary.Vocabulary;
@@ -27,6 +35,13 @@ public class BowIndex implements Index {
 	}
 	
 	public void indexDocument(File document, String documentId) throws IOException {
+		// let the document be indexed
+		ArrayList<String> step4 = indexDocument(document);
+		// save results for this document into internal data structure
+		this.data.put(documentId, step4);
+	}
+	
+	private ArrayList<String> indexDocument(File document) throws IOException { 
 		// load whole file into String
 		// source: http://stackoverflow.com/questions/14169661/read-complete-file-without-using-loop-in-java
 		List<String> lines = Files.readAllLines(document.toPath(), StandardCharsets.ISO_8859_1);
@@ -36,7 +51,7 @@ public class BowIndex implements Index {
 		for (int i = 0; i < lines.size(); i++) {
 			// get line
 			String line = lines.get(i);
-			// decide concat or skip
+			// decide concatenate or skip
 			if (pastheaders == true) {
 				text = text + " " + line;
 			} else if (line.length() == 0) {
@@ -72,13 +87,66 @@ public class BowIndex implements Index {
 			//System.out.println("Stemmer: " + word + " -> " + stem);
 			step4.add(stem);
 		}
-		// save results for this document into internal data structure
-		this.data.put(documentId, step4);
+		// output
+		return step4;
 	}
 
-	public ArrayList<SearchResult> getSimilarDocuments(File searchTopic, Search scoringClass, String topicId, String runName) {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<SearchResult> getSimilarDocuments(File searchTopic, Search scoringClass, String topicId, String runName) throws IOException {
+		// load topic from file and index it
+		String[] indexedTopic = (String[]) indexDocument(searchTopic).toArray();
+		// get scores for each document
+		String[] indexDocs = (String[]) this.data.keySet().toArray();
+		HashMap<String, Double> scores = new HashMap<String, Double>();
+		for (int i=0; i < indexDocs.length; i++) {
+			// get documentId
+			String documentId = indexDocs[i];
+			// get document
+			String[] document = (String[]) this.data.get(documentId).toArray(); 
+			// get score for that document relative to this topic
+			Double score = scoringClass.search(document, indexedTopic);
+			// save score into list
+			scores.put(documentId, score);
+		}
+		// get top 10
+		Map<String, Double> scoresSorted = sortByValues(scores);
+		String[] scoresKeySet = (String[]) scoresSorted.keySet().toArray();
+		ArrayList<SearchResult> results = new ArrayList<SearchResult>(10);
+		for (int i = scoresKeySet.length-1; i >= scoresKeySet.length-1-10; i--) {
+			// prepare search result
+			String documentId = scoresKeySet[i];
+			Double score = scores.get(documentId);
+			int rank = i - scoresKeySet.length;
+			SearchResult res = new SearchResult(documentId, topicId, rank, score, runName);
+			// append to output
+			results.add(res);
+		}
+		return results;
+	}
+	
+	public static <T extends Comparable<? super T>> List<T> asSortedList(Collection<T> c) {
+	  List<T> list = new ArrayList<T>(c);
+	  java.util.Collections.sort(list);
+	  return list;
+	}
+	
+	private static HashMap sortByValues(HashMap map) {
+		List list = new LinkedList(map.entrySet());
+		// Defined Custom Comparator here
+		Collections.sort(list, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((Comparable) ((Map.Entry) (o1)).getValue())
+						.compareTo(((Map.Entry) (o2)).getValue());
+			}
+		});
+
+		// Here I am copying the sorted list in HashMap
+		// using LinkedHashMap to preserve the insertion order
+		HashMap sortedHashMap = new LinkedHashMap();
+		for (Iterator it = list.iterator(); it.hasNext();) {
+			Map.Entry entry = (Map.Entry) it.next();
+			sortedHashMap.put(entry.getKey(), entry.getValue());
+		}
+		return sortedHashMap;
 	}
 
 	public void load(File indexFile) throws FileNotFoundException, ClassNotFoundException, IOException {
@@ -89,8 +157,7 @@ public class BowIndex implements Index {
 		ObjectInputStream obj_in = new ObjectInputStream(f_in);
 		// Read an object
 		Object obj = obj_in.readObject();
-		if (obj instanceof HashMap)
-		{
+		if (obj instanceof HashMap) {
 			// Cast object to a Vector
 			this.data = (HashMap<String, ArrayList<String>>) obj;
 			// status message

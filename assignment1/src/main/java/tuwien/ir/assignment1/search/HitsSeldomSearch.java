@@ -5,9 +5,8 @@ import java.util.HashMap;
 public class HitsSeldomSearch implements Search {
 
 	public double search(String[] document, String[] topic) {
-		// TODO Auto-generated method stub
+		// count each word's occurrence
 		HashMap<String, Integer> counts = new HashMap<String, Integer>();
-		// count each word
 		for (int i=0; i < document.length; i++) {
 			// get word
 			String word = document[i];
