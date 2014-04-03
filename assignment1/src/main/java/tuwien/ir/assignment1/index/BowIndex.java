@@ -10,11 +10,11 @@ import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import tuwien.ir.assignment1.search.Search;
 import tuwien.ir.assignment1.vocabulary.Vocabulary;
 import tuwien.ir.assignment1.vocabulary.VocabularyImpl;
 
@@ -76,7 +76,7 @@ public class BowIndex implements Index {
 		this.data.put(documentId, step4);
 	}
 
-	public ArrayList<SearchResult> getSimilarDocuments(File document, String topicId, String runName) {
+	public ArrayList<SearchResult> getSimilarDocuments(File searchTopic, Search scoringClass, String topicId, String runName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -120,4 +120,5 @@ public class BowIndex implements Index {
 		//summary of contents
 		return "Summary:\n" + "Number of documents in index: " + new Integer(this.data.size());
 	}
+
 }

@@ -4,6 +4,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
+import tuwien.ir.assignment1.search.Search;
+
 public class BigramIndex implements Index {
 
 	public void indexDocument(File document, String documentId) {
@@ -11,8 +13,7 @@ public class BigramIndex implements Index {
 
 	}
 
-	public ArrayList<SearchResult> getSimilarDocuments(File document,
-			String topicId, String runName) {
+	public ArrayList<SearchResult> getSimilarDocuments(File searchTopic, Search scoringClass, String topicId, String runName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -31,4 +32,5 @@ public class BigramIndex implements Index {
 		//TODO summary of contents
 		return null;
 	}
+	
 }

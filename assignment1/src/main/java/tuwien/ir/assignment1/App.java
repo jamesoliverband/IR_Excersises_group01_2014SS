@@ -10,6 +10,9 @@ import tuwien.ir.assignment1.index.BigramIndex;
 import tuwien.ir.assignment1.index.BowIndex;
 import tuwien.ir.assignment1.index.Index;
 import tuwien.ir.assignment1.index.SearchResult;
+import tuwien.ir.assignment1.search.HitsOverallSearch;
+import tuwien.ir.assignment1.search.HitsSeldomSearch;
+import tuwien.ir.assignment1.search.Search;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,11 +54,11 @@ public class App {
 	public String sarchRunName = null;
 
 	/*
-	 * M1 = TODO
-	 * M2 = TODO
+	 * Hits overall = hit count = number of words from topic also show up in document in index ...
+	 * Hits seldcom = most seldom words and within these the most hits
 	 */
 	enum ScoringMethod {
-		M1, M2
+		HitsOverall, HitsSeldom
 	}
 
 	@Option(name = "-s", aliases = { "--scoring-method" }, usage = "scoring method", required = true)
@@ -114,11 +117,24 @@ public class App {
 		}
 		// either make index or search index
 		if (app.searchTopic != null) {
-			// search mode
+			// search Mode
 			// load index
 			index.load(app.indexFile);
+			// get scoring method class
+			Search searcher = null;
+			switch (app.scoringMethod) {
+				case HitsOverall:
+					searcher = new HitsOverallSearch();
+					break;
+				case HitsSeldom:
+					searcher = new HitsSeldomSearch();
+					break;
+				default:
+					System.err.println("ERROR: Unexpected value for scoring method. Exiting.");
+					System.exit(1);
+			}
 			// perform search
-			ArrayList<SearchResult> results = index.getSimilarDocuments(app.searchTopic, app.searchTopicId, app.sarchRunName);
+			ArrayList<SearchResult> results = index.getSimilarDocuments(app.searchTopic, searcher, app.searchTopicId, app.sarchRunName);
 			// print results
 			for (int i=0; i < results.size(); i++) {
 				// get result
@@ -127,7 +143,7 @@ public class App {
 				System.out.println(result.toString());
 			}
 		} else if (app.documentsDir != null) {
-			// index creation mode
+			// Index Creation Mode
 			// get file list
 			// source:
 			// http://stackoverflow.com/questions/2056221/recursively-list-files-in-java
@@ -150,7 +166,7 @@ public class App {
 				// index the document
 				//System.out.println(file.getAbsolutePath());
 				index.indexDocument(file, documentId);
-				//break;	//TODO only first file
+				//break;	//TODO process only first file
 			}
 			// save index
 			index.save(app.indexFile.toPath());
