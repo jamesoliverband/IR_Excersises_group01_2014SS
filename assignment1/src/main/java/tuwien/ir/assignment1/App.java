@@ -6,8 +6,19 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import tuwien.ir.assignment1.index.BigramIndex;
+import tuwien.ir.assignment1.index.BowIndex;
+import tuwien.ir.assignment1.index.Index;
+import tuwien.ir.assignment1.index.SearchResult;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +27,7 @@ import java.util.List;
  */
 public class App {
 	/*
-	 * BOW = bag of words
-	 * BIG = bigram
+	 * BOW = bag of words BIG = bigram
 	 */
 	enum IndexFormat {
 		BOW, BIG
@@ -26,18 +36,23 @@ public class App {
 	@Option(name = "-f", aliases = { "--index-format" }, usage = "index format", required = true)
 	public IndexFormat indexFormat = IndexFormat.BOW;
 
-	@Option(name = "-i", aliases = { "--index" }, usage = "index filename", required = true, metaVar = "INPUT", depends = { "-f" })
-	public File inputFile = new File("in.txt");
+	@Option(name = "-i", aliases = { "--index" }, usage = "index filename", required = true, metaVar = "INDEX", depends = { "-f" })
+	public File indexFile = new File("index.txt");
 
 	@Option(name = "-d", aliases = { "--docs" }, usage = "documents directory", required = false, metaVar = "DOCS", depends = { "-i" })
-	public File documentsDir = new File("20_newsgroups_subset/");
+	public File documentsDir = null;	//new File("20_newsgroups_subset/");
 
-	@Option(name = "-s", aliases = { "--search-topic" }, usage = "search topic", required = false, metaVar = "TOPIC", depends =  { "-i" })
-	public File searchTopic = new File("topics/topic1");
+	@Option(name = "-t", aliases = { "--search-topic" }, usage = "search topic", required = false, metaVar = "TOPIC", depends = { "-i", "-s", "-tid", "-rn" })
+	public File searchTopic = null;	//new File("topics/topic1");
+
+	@Option(name = "-tid", aliases = { "--topic-id" }, usage = "search topic id", required = false)
+	public String searchTopicId = null;
+	
+	@Option(name = "-rn", aliases = { "--run-name" }, usage = "search run name", required = false)
+	public String sarchRunName = null;
 
 	/*
-	 * M1 = TODO
-	 * M2 = TODO
+	 * M1 = TODO M2 = TODO
 	 */
 	enum ScoringMethod {
 		M1, M2
@@ -68,10 +83,11 @@ public class App {
 	 * 
 	 * @Option(name="-custom",handler=BooleanOptionHandler.class,usage=
 	 * "boolean value for checking the custom handler") private boolean data;
-	 */ 
-	 // receives other command line parameters than options
-	 
-	@Argument private List<String> arguments = new ArrayList<String>();
+	 */
+	// receives other command line parameters than options
+
+	@Argument
+	private List<String> arguments = new ArrayList<String>();
 
 	public static void main(String[] args) throws IOException {
 		App app = new App();
@@ -88,28 +104,64 @@ public class App {
 		 * } }
 		 */
 		System.out.println("Exiting.");
-		
+
+		// new index depending with correct type, according to cmdline
+		Index index = null;
+		switch (app.indexFormat) {
+		case BOW:
+			index = new BowIndex();
+			break;
+		case BIG:
+			index = new BigramIndex();
+			break;
+		default:
+			System.out
+					.println("ERROR: initialize index: Unrecognized index format. Exiting.");
+			System.exit(1);
+		}
 		// either make index or search index
-		if (app.searchTopic != null) {	// search mode
-			// new index
-			//TODO
+		if (app.searchTopic != null) {
+			// search mode
 			// load index
-			//TODO
+			index.load(app.indexFile);
 			// perform search
-			//TODO
+			ArrayList<SearchResult> results = index.getSimilarDocuments(app.searchTopic, app.searchTopicId, app.sarchRunName);
 			// print results
-			//TODO
-		} else if (app.documentsDir == null) {	// index creation mode
-			// new index
-			//TODO
+			for (int i=0; i < results.size(); i++) {
+				// get result
+				SearchResult result = results.get(i);
+				// print this result
+				System.out.println(result.toString());
+			}
+		} else if (app.documentsDir != null) {
+			// index creation mode
 			// get file list
-			//TODO
+			// source:
+			// http://stackoverflow.com/questions/2056221/recursively-list-files-in-java
+			// source:
+			// http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html
+			// source:
+			// http://www.riedquat.de/blog/2011-02-26-01
+			Find finder = app.new Find();
+			Files.walkFileTree(app.documentsDir.toPath(), finder);	//Paths.get( System.getProperty( "user.home" ) )
+			System.out.format("Found %d documents to index.\n", finder.foundFiles.size());
+			System.out.println("Indexing all files...");
 			// index all documents
-			//TODO
+			for (int i=0; i < finder.foundFiles.size(); i++) {
+				// get file
+				File file = finder.foundFiles.get(i);
+				// generate documentId
+				String lastpath = file.getParentFile().getName();
+				String filename = file.getName();
+				String documentId = lastpath + file.pathSeparator + filename;
+				// index the document
+				//System.out.println(file.getAbsolutePath());
+				index.indexDocument(file, documentId);
+			}
 			// save index
-			//TODO
+			index.save(app.indexFile.toPath());
 			// print summary
-			//TODO
+			System.out.println(index.toString());
 		}
 	}
 
@@ -129,13 +181,20 @@ public class App {
 
 			// after parsing arguments, you should check
 			// if enough arguments are given.
-			//if (arguments.isEmpty())
-			//	throw new CmdLineException(parser, "No argument is given");
+			// if (arguments.isEmpty())
+			// throw new CmdLineException(parser, "No argument is given");
 
 			if (searchTopic == null && documentsDir == null) {
-				throw new CmdLineException(parser, "One out of --serach-topic (perform search) or --docs (scan docs and generate index) must be given");
+				throw new CmdLineException(
+						parser,
+						"One out of --search-topic (perform search) or --docs (scan docs and generate index) must be given");
 			} else if (searchTopic != null && documentsDir != null) {
-				throw new CmdLineException(parser, "Only one out of --serach-topic (perform search) or --docs (scan docs and generate index) can be given");
+				System.out.println("searchTopic: " + searchTopic);
+				System.out.println("searchTopic len: " + new Long(searchTopic.length()).toString());
+				System.out.println("documentsDir: " + documentsDir.getCanonicalPath());
+				throw new CmdLineException(
+						parser,
+						"Only one out of --search-topic (perform search) or --docs (scan docs and generate index) can be given");
 			}
 
 		} catch (CmdLineException e) {
@@ -151,11 +210,12 @@ public class App {
 			// print option sample. This is useful some time
 			System.err.println(" Example: java App" + parser.printExample(ALL));
 
-			return;
+			System.exit(1);
 		}
 
-		// this will redirect the output to the specified output (metaVar=OUTPUT)
-		//System.out.println(out);
+		// this will redirect the output to the specified output
+		// (metaVar=OUTPUT)
+		// System.out.println(out);
 
 		/*
 		 * if (recursive) System.out.println("-r flag is set"); if (data)
@@ -166,9 +226,29 @@ public class App {
 		 * arguments) System.out.println(s);
 		 */
 		System.out.println("--- Begin cmdline options:");
-		System.out.println("index file is " + inputFile);
+		System.out.println("index file is " + indexFile);
 		System.out.println("index format is " + indexFormat);
 		System.out.println("scoring method is " + scoringMethod);
 		System.out.println("--- End of options.");
+	}
+	
+	class Find extends SimpleFileVisitor<Path> {
+		public ArrayList<File> foundFiles;
+		
+		public Find() {
+			this.foundFiles = new ArrayList<File>();
+		}
+	    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+	        if (".svn".equals(dir.getFileName().toString())) {
+	            return FileVisitResult.SKIP_SUBTREE;
+	        }
+	        //System.out.println(dir);
+	        return FileVisitResult.CONTINUE;
+	    }
+	    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+	        //System.out.println(file);
+	        this.foundFiles.add(file.toFile());
+	        return FileVisitResult.CONTINUE;
+	    }
 	}
 }
