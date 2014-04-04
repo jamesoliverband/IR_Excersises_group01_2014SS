@@ -11,7 +11,15 @@ public class HitsOverallSearch implements Search {
 				}
 			}
 		}
-		return hits / document.length;
+		/*
+		//NOTE: leads to NaN for some strange reason (FIXME)
+		Double hits2 = new Double(hits);
+		Double len2 = new Double(document.length);
+		Double res = hits2 / len2;
+		res *= 100;
+		return res;
+		*/
+		return new Double(hits);
 	}
 
 }

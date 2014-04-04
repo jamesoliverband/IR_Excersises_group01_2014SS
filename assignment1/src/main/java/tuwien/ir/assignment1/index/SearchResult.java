@@ -17,6 +17,6 @@ public class SearchResult {
 	}
 	
 	public String toString() {
-		return String.format("%s %s %s %d %.8f %s", this.topicId, this.Q0, this.documentId, this.rank, this.score, this.runName);
+		return String.format("%s %s %s %d %f %s", this.topicId, this.Q0, this.documentId, this.rank, this.score, this.runName);
 	}
 }

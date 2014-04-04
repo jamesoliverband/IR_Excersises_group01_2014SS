@@ -93,15 +93,22 @@ public class BowIndex implements Index {
 
 	public ArrayList<SearchResult> getSimilarDocuments(File searchTopic, Search scoringClass, String topicId, String runName) throws IOException {
 		// load topic from file and index it
-		String[] indexedTopic = (String[]) indexDocument(searchTopic).toArray();
+		// source: http://stackoverflow.com/questions/5374311/convert-arrayliststring-to-string
+		ArrayList<String> indexedTopic1 = indexDocument(searchTopic);	// NOTE: no direct .toArray() of type String[] -> 3 lines instead of 1 (FIXME)
+		String[] indexedTopic = new String[indexedTopic1.size()];
+		indexedTopic = indexedTopic1.toArray(indexedTopic);
 		// get scores for each document
-		String[] indexDocs = (String[]) this.data.keySet().toArray();
+		Set<String> indexDocs1 = this.data.keySet();	// NOTE: no direct .toArray() of type String[] -> 3 lines instead of 1
+		String[] indexDocs = new String[indexDocs1.size()];
+		indexDocs = indexDocs1.toArray(indexDocs);
 		HashMap<String, Double> scores = new HashMap<String, Double>();
 		for (int i=0; i < indexDocs.length; i++) {
 			// get documentId
 			String documentId = indexDocs[i];
 			// get document
-			String[] document = (String[]) this.data.get(documentId).toArray(); 
+			ArrayList<String> document1 = this.data.get(documentId);	// NOTE: no direct .toArray() of type String[] -> 3 lines instead of 1
+			String[] document = new String[document1.size()];
+			document = document1.toArray(document);
 			// get score for that document relative to this topic
 			Double score = scoringClass.search(document, indexedTopic);
 			// save score into list
@@ -109,13 +116,15 @@ public class BowIndex implements Index {
 		}
 		// get top 10
 		Map<String, Double> scoresSorted = sortByValues(scores);
-		String[] scoresKeySet = (String[]) scoresSorted.keySet().toArray();
+		Set<String> scoresKeySet1 = scoresSorted.keySet();	// NOTE: no direct .toArray() of type String[] -> 3 lines instead of 1
+		String[] scoresKeySet = new String[scoresKeySet1.size()];
+		scoresKeySet = scoresKeySet1.toArray(scoresKeySet);
 		ArrayList<SearchResult> results = new ArrayList<SearchResult>(10);
-		for (int i = scoresKeySet.length-1; i >= scoresKeySet.length-1-10; i--) {
+		for (int i = scoresKeySet.length-1; i > scoresKeySet.length-1-10; i--) {
 			// prepare search result
 			String documentId = scoresKeySet[i];
 			Double score = scores.get(documentId);
-			int rank = i - scoresKeySet.length;
+			int rank = scoresKeySet.length - i;
 			SearchResult res = new SearchResult(documentId, topicId, rank, score, runName);
 			// append to output
 			results.add(res);
@@ -129,6 +138,7 @@ public class BowIndex implements Index {
 	  return list;
 	}
 	
+	// source: http://beginnersbook.com/2013/12/how-to-sort-hashmap-in-java-by-keys-and-values/
 	private static HashMap sortByValues(HashMap map) {
 		List list = new LinkedList(map.entrySet());
 		// Defined Custom Comparator here
@@ -159,7 +169,7 @@ public class BowIndex implements Index {
 		Object obj = obj_in.readObject();
 		if (obj instanceof HashMap) {
 			// Cast object to a Vector
-			this.data = (HashMap<String, ArrayList<String>>) obj;
+			this.data = ((HashMap<String, ArrayList<String>>) obj);
 			// status message
 			System.out.println("Load index success.");
 		} else {

@@ -1,5 +1,7 @@
 package tuwien.ir.assignment1.search;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class HitsSeldomSearch implements Search {
@@ -18,7 +20,10 @@ public class HitsSeldomSearch implements Search {
 			}
 		}
 		// get seldom word threshold (50 % of max value)
-		Integer[] vals = (Integer[]) counts.values().toArray();
+		// source: http://stackoverflow.com/questions/5374311/convert-arrayliststring-to-string
+		Collection<Integer> vals1 = counts.values();	// NOTE: no direct .toArray() of type String[] -> 3 lines instead of 1
+		Integer[] vals = new Integer[vals1.size()];
+		vals = vals1.toArray(vals);
 		Integer maxCount = 0;
 		for (int i=0; i < vals.length; i++) {
 			// get count value
@@ -38,7 +43,9 @@ public class HitsSeldomSearch implements Search {
 				}
 			}
 		}
-		return hits / document.length;
+		//NOTE: leads to NaN for some strange reason (FIXME)
+		//return hits / document.length;
+		return new Double(hits);
 	}
 
 }
