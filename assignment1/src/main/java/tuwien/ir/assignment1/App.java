@@ -27,6 +27,12 @@ import java.util.List;
 /**
  * Main application class of assignment.
  */
+/*
+The CLI allows the user to enter provide
+search parameters and
+a file with a topic to search for. // bag-of-words or the bi-gram
+index, scoring method)
+*/
 public class App {
 	/*
 	 * BOW = bag of words BIG = bigram
@@ -55,13 +61,13 @@ public class App {
 
 	/*
 	 * Hits overall = hit count = number of words from topic also show up in document in index ...
-	 * Hits seldcom = most seldom words and within these the most hits
+	 * Hits seldom = most seldom words and within these the most hits
 	 */
 	enum ScoringMethod {
 		HitsOverall, HitsSeldom
 	}
 
-	@Option(name = "-s", aliases = { "--scoring-method" }, usage = "scoring method", required = true)
+	@Option(name = "-s", aliases = { "--scoring-method" }, usage = "scoring method", required = false)
 	public ScoringMethod scoringMethod;
 
 	/*
@@ -93,89 +99,31 @@ public class App {
 	private List<String> arguments = new ArrayList<String>();
 
 	public static void main(String[] args) throws Exception {
-		App app = new App();
-		app.doMain(args);
-		/*
-			The CLI allows the user to enter provide
-			search parameters and
-			a file with a topic to search for. // bag-of-words or the bi-gram
-			index, scoring method)
-		*/
+		if (args.length == 1 && args[0].equals("--auto")) {
+			//auto-mode for all 20 topics
+			System.out.println("Starting full auto mode...");
+			
+			App app = null;
+			// create index, BOW
+			//--index c:\index.csv --index-format BOW --scoring-method HitsOverall --docs "C:\Dokumente und Einstellungen\Administrator\git\IR_Excersises_group01_2014SS\assignment1\src\main\resources\20_newsgroups_subset"
+			app = new App();
+			app.doMain(new String[] {"--index", "c:\\index.csv", "--index-format", "BOW", "--scoring-method", "HitsOverall", "--docs", "C:\\Dokumente und Einstellungen\\Administrator\\git\\IR_Excersises_group01_2014SS\\assignment1\\src\\main\\resources\\20_newsgroups_subset"});
+			// search index, BOW using search+scoring method HitsOverall or HitsSeldom
+			//--index c:\index.csv --index-format BOW --scoring-method HitsOverall --search-topic "C:\Dokumente und Einstellungen\Administrator\git\IR_Excersises_group01_2014SS\assignment1\src\main\resources\topics\topic1" -tid topic1 -rn group01-experiment01
+			//--index c:\index.csv --index-format BOW --scoring-method HitsSeldom --search-topic "C:\Dokumente und Einstellungen\Administrator\git\IR_Excersises_group01_2014SS\assignment1\src\main\resources\topics\topic1" -tid topic1 -rn group01-experiment01
+			for (int i=1; i <= 20; i++) {
+				app = new App();
+				String tid = new Integer(i).toString();
+				app.doMain(new String[] {"--index", "c:\\index.csv", "--index-format", "BOW", "--scoring-method", "HitsSeldom", "--search-topic", "C:\\Dokumente und Einstellungen\\Administrator\\git\\IR_Excersises_group01_2014SS\\assignment1\\src\\main\\resources\\topics\\topic" + tid, "-tid", "topic" + tid, "-rn", "group01-experiment01"});
+			}
+		} else {
+			App app = new App();
+			app.doMain(args);
+		}
 		System.out.println("Exiting.");
-		// make new index depending with correct type, according to command-line
-		Index index = null;
-		switch (app.indexFormat) {
-		case BOW:
-			index = new BowIndex();
-			break;
-		case BIG:
-			index = new BigramIndex();
-			break;
-		default:
-			System.out.println("ERROR: initialize index: Unrecognized index format. Exiting.");
-			System.exit(1);
-		}
-		// either make index or search index
-		if (app.searchTopic != null) {
-			// search Mode
-			// load index
-			index.load(app.indexFile);
-			// get scoring method class
-			Search searcher = null;
-			switch (app.scoringMethod) {
-				case HitsOverall:
-					searcher = new HitsOverallSearch();
-					break;
-				case HitsSeldom:
-					searcher = new HitsSeldomSearch();
-					break;
-				default:
-					System.err.println("ERROR: Unexpected value for scoring method. Exiting.");
-					System.exit(1);
-			}
-			// perform search
-			ArrayList<SearchResult> results = index.getSimilarDocuments(app.searchTopic, searcher, app.searchTopicId, app.sarchRunName);
-			// print results
-			for (int i=0; i < results.size(); i++) {
-				// get result
-				SearchResult result = results.get(i);
-				// print this result
-				System.out.println(result.toString());
-			}
-		} else if (app.documentsDir != null) {
-			// Index Creation Mode
-			// get file list
-			// source:
-			// http://stackoverflow.com/questions/2056221/recursively-list-files-in-java
-			// source:
-			// http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html
-			// source:
-			// http://www.riedquat.de/blog/2011-02-26-01
-			Find finder = app.new Find();
-			Files.walkFileTree(app.documentsDir.toPath(), finder);	//Paths.get( System.getProperty( "user.home" ) )
-			System.out.format("Found %d documents to index.\n", finder.foundFiles.size());
-			System.out.println("Indexing all files...");
-			// index all documents
-			for (int i=0; i < finder.foundFiles.size(); i++) {
-				// get file
-				File file = finder.foundFiles.get(i);
-				// generate documentId
-				String lastpath = file.getParentFile().getName();
-				String filename = file.getName();
-				String documentId = lastpath + File.pathSeparator + filename;
-				// index the document
-				//System.out.println(file.getAbsolutePath());
-				index.indexDocument(file, documentId);
-				//break;	//TODO process only first file
-			}
-			// save index
-			index.save(app.indexFile.toPath());
-			// print summary
-			System.out.println(index.toString());
-		}
 	}
 
-	public void doMain(String[] args) throws IOException {
+	public void doMain(String[] args) throws IOException, ClassNotFoundException {
 		CmdLineParser parser = new CmdLineParser(this);
 
 		// if you have a wider console, you could increase the value;
@@ -240,6 +188,83 @@ public class App {
 		System.out.println("index format is " + indexFormat);
 		System.out.println("scoring method is " + scoringMethod);
 		System.out.println("--- End of options.");
+
+		// make new index depending with correct type, according to command-line
+		Index index = null;
+		switch (this.indexFormat) {
+		case BOW:
+			index = new BowIndex();
+			break;
+		case BIG:
+			index = new BigramIndex();
+			break;
+		default:
+			System.out.println("ERROR: initialize index: Unrecognized index format. Exiting.");
+			System.exit(1);
+		}
+		// either make index or search index
+		if (this.searchTopic != null) {
+			// search Mode
+			// load index
+			System.out.println("Loading index...");
+			index.load(this.indexFile);
+			// get scoring method class
+			System.out.println("Selecting search scoring method...");
+			Search searcher = null;
+			switch (this.scoringMethod) {
+				case HitsOverall:
+					searcher = new HitsOverallSearch();
+					break;
+				case HitsSeldom:
+					searcher = new HitsSeldomSearch();
+					break;
+				default:
+					System.err.println("ERROR: Unexpected value for scoring method. Exiting.");
+					System.exit(1);
+			}
+			// perform search
+			System.out.println("Performing search...");
+			ArrayList<SearchResult> results = index.getSimilarDocuments(this.searchTopic, searcher, this.searchTopicId, this.sarchRunName);
+			// print results
+			System.out.println("Results:");
+			for (int i=0; i < results.size(); i++) {
+				// get result
+				SearchResult result = results.get(i);
+				// print this result
+				System.out.println(result.toString());
+			}
+		} else if (this.documentsDir != null) {
+			// Index Creation Mode
+			// get file list
+			// source:
+			// http://stackoverflow.com/questions/2056221/recursively-list-files-in-java
+			// source:
+			// http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html
+			// source:
+			// http://www.riedquat.de/blog/2011-02-26-01
+			Find finder = this.new Find();
+			Files.walkFileTree(this.documentsDir.toPath(), finder);	//Paths.get( System.getProperty( "user.home" ) )
+			System.out.format("Found %d documents to index.\n", finder.foundFiles.size());
+			System.out.println("Indexing all documents...");
+			// index all documents
+			for (int i=0; i < finder.foundFiles.size(); i++) {
+				// get file
+				File file = finder.foundFiles.get(i);
+				// generate documentId
+				String lastpath = file.getParentFile().getName();
+				String filename = file.getName();
+				String documentId = lastpath + File.separator + filename;
+				// index the document
+				//System.out.println(file.getAbsolutePath());
+				index.indexDocument(file, documentId);
+				//break;	//DEBUG process only first file
+			}
+			// save index
+			System.out.println("Saving index...");
+			index.save(this.indexFile.toPath());
+			// print summary
+			System.out.println(index.toString());
+		}	
 	}
 	
 	class Find extends SimpleFileVisitor<Path> {
