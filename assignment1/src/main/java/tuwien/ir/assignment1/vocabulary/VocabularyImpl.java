@@ -76,7 +76,7 @@ public class VocabularyImpl implements Vocabulary {
 	 */
 	public String[] caseFolding(String[] s) {
 		for (int i = 0; i < s.length; i++) { // FIXME ' should not be affected by this method because its useful for stemming
-			s[i] = s[i].toLowerCase().replaceAll("\\p{Punct}", "");
+			s[i] = s[i].toLowerCase().replaceAll("\\p{Punct}&&[^']", "");
 		}
 
 

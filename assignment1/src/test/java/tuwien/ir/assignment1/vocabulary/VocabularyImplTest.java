@@ -42,7 +42,7 @@ public class VocabularyImplTest {
 		String s = "bitter";
 		VocabularyImpl voc = new VocabularyImpl();	
 		s = voc.stemming(s);
-		assertEquals("bi",s);
+		assertEquals("bitt",s);
 	}
 	
 	/**
@@ -50,7 +50,12 @@ public class VocabularyImplTest {
 	 */
 	@Test
 	public void testCaseFolding() {
-		fail("Not yet implemented");
+		String s = "who's bitters' is in the house";
+		VocabularyImpl voc = new VocabularyImpl();	
+		String[] str = voc.tokenize(s);
+		str = voc.caseFolding(str);
+		assertEquals("who's",str[0]);
+		assertEquals("bitters'",str[1]);
 	}
 
 }
