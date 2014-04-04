@@ -34,7 +34,15 @@ public class VocabularyImplTest {
 		String s = "buildings";
 		VocabularyImpl voc = new VocabularyImpl();	
 		s = voc.stemming(s);
-		assertEquals("building",s);
+		assertEquals("build",s);
+	}
+	
+	@Test
+	public void testStemming2(){
+		String s = "bitter";
+		VocabularyImpl voc = new VocabularyImpl();	
+		s = voc.stemming(s);
+		assertEquals("bi",s);
 	}
 	
 	/**

@@ -155,7 +155,7 @@ public class Stemming {
 				s = s.substring(0, s.length()- 2);
 			}else if (s.endsWith("e")){
 				s = s.substring(0, s.length()- 1);
-			}else if (s.charAt(s.length()) == s.charAt(s.length()-1)) { // or if the word ends with a double remove the last letter (so hopp -> hop)
+			}else if (s.charAt(s.length()-1) == s.charAt(s.length()-2)) { // or if the word ends with a double remove the last letter (so hopp -> hop)
 				s = s.substring(0, s.length()- 1);
 			}else if (isShort(s)){ // if the word is short add e
 				s = s + "e";
