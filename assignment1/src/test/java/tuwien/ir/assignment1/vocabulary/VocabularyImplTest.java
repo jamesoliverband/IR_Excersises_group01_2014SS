@@ -45,6 +45,13 @@ public class VocabularyImplTest {
 		assertEquals("bitt",s);
 	}
 	
+	@Test
+	public void testStemmingliEnding(){
+		String s = "happily";
+		VocabularyImpl voc = new VocabularyImpl();	
+		s = voc.stemming(s);
+		assertEquals("happili",s);
+	}
 	/**
 	 * Test method for {@link tuwien.ir.assignment1.vocabulary.VocabularyImpl#caseFolding(java.lang.String[])}.
 	 */

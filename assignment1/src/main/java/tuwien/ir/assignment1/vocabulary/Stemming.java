@@ -167,7 +167,7 @@ public class Stemming {
 		 */
 		if (s.endsWith("y") && s.length() > 2){
 			// check if preceding letter is vowel
-			if (!isVowel(s.charAt(s.length()-1))){
+			if (!isVowel(s.charAt(s.length()-2))){
 				s = s.substring(0,s.length() - 1) + "i";
 			}
 		}
@@ -183,11 +183,11 @@ public class Stemming {
 		 * izer   ization:   replace by ize 
 		 * ational   ation   ator:   replace by ate 
 		 * alism   aliti   alli:   replace by al 
-		 * TODO
 		 * fulness:   replace by ful 
 		 * ousli   ousness:   replace by ous 
 		 * iveness   iviti:   replace by ive 
 		 * biliti   bli+:   replace by ble 
+		 * TODO
 		 * ogi+:   replace by og if preceded by l 
 		 * fulli+:   replace by ful 
 		 * lessli+:   replace by less 
@@ -195,6 +195,7 @@ public class Stemming {
 		 * 
 		 */
 		region1 = getR1(s);
+		if (region1 != null){
 		if (region1.endsWith("tional")){
 			s = s.substring(0, s.length()-2);
 		}else if (region1.endsWith("enci")){
@@ -235,10 +236,16 @@ public class Stemming {
 			s = s.substring(0, s.length()-6) + "ble";
 		}else if (region1.endsWith("bli")){
 			s = s.substring(0, s.length()-3) + "ble";
-		}else if (region1.endsWith("ogi")){ // TODO replace by og if preceded by l 
+		}else if (region1.endsWith("ogi") && region1.charAt(region1.length()-5) == 'l'){ // replace by og if preceded by l 
+			s = s.substring(0, s.length()-1) ;
+		}else if (region1.endsWith("fulli")){
+			s = s.substring(0, s.length()-2);
+		}else if (region1.endsWith("lessli")){
+			s = s.substring(0, s.length()-2);
+		}else if (region1.endsWith("li") && isValidLiEnding(region1)){
 			s = s.substring(0, s.length()-3) + "ble";
 		}
-		
+		}
 		/*
 		 * Step 3
 		 * 
@@ -251,6 +258,9 @@ public class Stemming {
 			ful   ness:   delete 
 			ative*:   delete if in R2 
 		 */
+		region1 = getR1(s);
+		
+		if (region1 != null){
 		if (s.endsWith("tional")){
 			s = s.substring(0, s.length()-6) + "tion";
 		}else if (s.endsWith("ational")){
@@ -271,6 +281,7 @@ public class Stemming {
 			s = s.substring(0, s.length()-4);
 		}else if (getR2(s).endsWith("ative")){
 			s = s.substring(0, s.length()-5);
+		}
 		}
 		
 		/*
@@ -307,6 +318,18 @@ public class Stemming {
 		
 		
 		return s;
+	}
+
+	private boolean isValidLiEnding(String s) {
+		if(s.endsWith("li")){
+			for (int i = 0; i < liEnding.length; i++){
+				if(s.charAt(s.length()-4)==liEnding[i]){
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 
 	/**
