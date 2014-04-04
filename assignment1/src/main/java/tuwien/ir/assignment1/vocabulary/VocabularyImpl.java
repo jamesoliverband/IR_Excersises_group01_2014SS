@@ -35,7 +35,7 @@ public class VocabularyImpl implements Vocabulary {
 			// Open the file that is the first
 			// command line parameter
 			String current = new java.io.File( "." ).getCanonicalPath();
-	        System.out.println("Current dir:"+current);
+	        //System.out.println("Current dir:"+current);
 			FileInputStream fstream = new FileInputStream("./target/classes/stoplist.txt");
 			// Get the object of DataInputStream
 			DataInputStream in = new DataInputStream(fstream);
@@ -45,7 +45,7 @@ public class VocabularyImpl implements Vocabulary {
 			while ((strLine = br.readLine()) != null) {
 				// Print the content on the console
 				stopWords.add(strLine);
-				System.out.println(strLine);
+				//System.out.println(strLine);
 			}
 			// Close the input stream
 			in.close();
