@@ -1,2 +1,5 @@
 Einbinden von Lucene -> Eclipse
 	http://www.lsi.upc.edu/~caim/lab/luceneEclipseNetbeans.txt
+
+Index generieren:
+	-docs c:\ir-20newsgroups -index c:\ir-index-lucene.txt
