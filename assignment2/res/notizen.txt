@@ -2,4 +2,8 @@ Einbinden von Lucene -> Eclipse
 	http://www.lsi.upc.edu/~caim/lab/luceneEclipseNetbeans.txt
 
 Index generieren:
-	-docs c:\ir-20newsgroups -index c:\ir-index-lucene.txt
+	-docs c:\ir-20newsgroups -index c:\ir-index-lucene-vanilla
+
+Index durchsuchen:
+	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10
+	Parameter "-raw" zeigt auch die Bewertung (Score) an, keine Ahnung was -field und -repeat macht
