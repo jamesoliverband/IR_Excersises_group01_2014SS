@@ -7,5 +7,7 @@
 	<classpathentry kind="lib" path="lib/asm-all-5.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-regexp-1.5.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-codecs-4.7.1.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-4.7.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
