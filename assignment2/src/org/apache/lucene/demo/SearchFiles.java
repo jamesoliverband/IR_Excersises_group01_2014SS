@@ -34,6 +34,9 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.similarities.BM25LSimilarity;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -87,8 +90,17 @@ public class SearchFiles {
       }
     }
     
+    //TODO first with BM25, then run again with BM25L 
+    //TODO loop over 20 topics
+    //TODO read 20 topics into file
+    //TODO topic: ignore until first empty line
+    //TODO topic: construct search query with all words from topic file
+    
     IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(index)));
     IndexSearcher searcher = new IndexSearcher(reader);
+    Similarity bm25vanilla = new BM25Similarity();
+    Similarity bm25mod = new BM25LSimilarity();
+    searcher.setSimilarity(bm25vanilla);
     // :Post-Release-Update-Version.LUCENE_XY:
     Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_47);
 
@@ -125,10 +137,12 @@ public class SearchFiles {
           searcher.search(query, null, 100);
         }
         Date end = new Date();
-        System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");
+        System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");	//DEBUG
       }
 
-      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null);
+      int experimentNo = 1;	//BM25
+      //int experimentNo = 2;	//BM25L
+      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, 1, experimentNo);
 
       if (queryString != null) {
         break;
@@ -148,14 +162,14 @@ public class SearchFiles {
    * 
    */
   public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
-                                     int hitsPerPage, boolean raw, boolean interactive) throws IOException {
+                                     int hitsPerPage, boolean raw, boolean interactive, int topicNo, int experimentNo) throws IOException {
  
     // Collect enough docs to show 5 pages
     TopDocs results = searcher.search(query, 5 * hitsPerPage);
     ScoreDoc[] hits = results.scoreDocs;
     
     int numTotalHits = results.totalHits;
-    System.out.println(numTotalHits + " total matching documents");
+    System.out.println(numTotalHits + " total matching documents");	//DEBUG
 
     int start = 0;
     int end = Math.min(numTotalHits, hitsPerPage);
@@ -183,11 +197,23 @@ public class SearchFiles {
         Document doc = searcher.doc(hits[i].doc);
         String path = doc.get("path");
         if (path != null) {
-          System.out.println((i+1) + ". " + path);
+          // output result
+          //System.out.println((i+1) + ". " + path);
+          // output format: topic Q0 document-id rank score run-name
+          String topic = "topic" + Integer.valueOf(topicNo).toString();
+          String Q0 = "Q0";
+          File f = new File(path);
+          String documentId = f.getParentFile().getName() + "/" + f.getName();	// eg. misc.forsale/76050
+          int rank = i+1;  // ascending
+          float score = hits[i].score;  // descending
+          String runName = "group1-experiment" + Integer.valueOf(experimentNo).toString();
+          System.out.println(topic + " " + Q0 + " " + documentId + " " + rank + " " + score + " " + runName);
+          /*
           String title = doc.get("title");
           if (title != null) {
             System.out.println("   Title: " + doc.get("title"));
           }
+          */
         } else {
           System.out.println((i+1) + ". " + "No path for this document");
         }
