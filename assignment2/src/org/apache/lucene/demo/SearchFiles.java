@@ -201,6 +201,7 @@ public class SearchFiles {
 			}
 		}
 		// -- concatenate to query string
+		// source: http://www.fh-wedel.de/~si/seminare/ws02/Ausarbeitung/e.lucene/2.html#group
 		String querystr = "";
 		for (int j = 0; j < words.size(); j++) {
 			querystr += "contents:" + words.get(j) + " ";
