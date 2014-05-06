@@ -22,7 +22,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -39,6 +43,8 @@ import org.apache.lucene.search.similarities.BM25Similarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+
+import org.apache.lucene.demo.OurFinder;
 
 /** Simple command-line based search demo. */
 public class SearchFiles {
@@ -61,6 +67,8 @@ public class SearchFiles {
     boolean raw = false;
     String queryString = null;
     int hitsPerPage = 10;
+    String topicsDir = ".";
+    String similarity = "bm25";
     
     for(int i = 0;i < args.length;i++) {
       if ("-index".equals(args[i])) {
@@ -87,68 +95,176 @@ public class SearchFiles {
           System.exit(1);
         }
         i++;
+      } else if ("-topicsdir".equals(args[i])) {
+    	  topicsDir = args[i+1];
+    	  System.out.println("DEBUG: Topics directory is " + topicsDir);
+      } else if ("-sim".equals(args[i])) {
+    	  similarity = args[i+1];
+    	  if ("bm25".equals(similarity) || "bm25l".equals(similarity)) {
+    		  //System.out.println("DEBUG: Selected similarity: " + similarity);
+    	  } else {
+    		  System.err.println("ERROR: allowed values for -similarity: bm25, bm25l");
+    		  System.exit(1);
+    	  }
       }
     }
     
     //TODO first with BM25, then run again with BM25L 
-    //TODO loop over 20 topics
-    //TODO read 20 topics into file
-    //TODO topic: ignore until first empty line
-    //TODO topic: construct search query with all words from topic file
-    
-    IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(index)));
-    IndexSearcher searcher = new IndexSearcher(reader);
-    Similarity bm25vanilla = new BM25Similarity();
-    Similarity bm25mod = new BM25LSimilarity();
-    searcher.setSimilarity(bm25vanilla);
-    // :Post-Release-Update-Version.LUCENE_XY:
-    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_47);
-
-    BufferedReader in = null;
-    if (queries != null) {
-      in = new BufferedReader(new InputStreamReader(new FileInputStream(queries), "UTF-8"));
-    } else {
-      in = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
-    }
-    // :Post-Release-Update-Version.LUCENE_XY:
-    QueryParser parser = new QueryParser(Version.LUCENE_47, field, analyzer);
-    while (true) {
-      if (queries == null && queryString == null) {                        // prompt the user
-        System.out.println("Enter query: ");
-      }
-
-      String line = queryString != null ? queryString : in.readLine();
-
-      if (line == null || line.length() == -1) {
-        break;
-      }
-
-      line = line.trim();
-      if (line.length() == 0) {
-        break;
-      }
-      
-      Query query = parser.parse(line);
-      System.out.println("Searching for: " + query.toString(field));
-            
-      if (repeat > 0) {                           // repeat & time as benchmark
-        Date start = new Date();
-        for (int i = 0; i < repeat; i++) {
-          searcher.search(query, null, 100);
-        }
-        Date end = new Date();
-        System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");	//DEBUG
-      }
-
-      int experimentNo = 1;	//BM25
-      //int experimentNo = 2;	//BM25L
-      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, 1, experimentNo);
-
-      if (queryString != null) {
-        break;
-      }
-    }
-    reader.close();
+	// get file list
+	// source:
+	// http://stackoverflow.com/questions/2056221/recursively-list-files-in-java
+	// source:
+	// http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html
+	// source:
+	// http://www.riedquat.de/blog/2011-02-26-01
+	OurFinder finder = new OurFinder();
+	Files.walkFileTree(new File(topicsDir).toPath(), finder);	//Paths.get( System.getProperty( "user.home" ) )
+	System.out.format("Found %d topics to search for.\n", finder.foundFiles.size());
+	System.out.println("Searching...");
+	// search for all topics
+    int experimentNo = 0;
+	for (int i=0; i < finder.foundFiles.size(); i++) {
+		// get file
+		File topic = finder.foundFiles.get(i);
+		System.out.println("Current topic: " + topic.getAbsolutePath());
+		// generate documentId
+		/*
+		String lastpath = file.getParentFile().getName();
+		String filename = file.getName();
+		String documentId = lastpath + File.separator + filename;
+		*/
+		// generate search query string from this topic
+		// -- load whole file into String
+		// source: http://stackoverflow.com/questions/14169661/read-complete-file-without-using-loop-in-java
+		List<String> lines = Files.readAllLines(topic.toPath(), StandardCharsets.ISO_8859_1);
+		// -- strip header fields
+		String text = "";
+		boolean pastheaders = false;
+		for (int j = 0; j < lines.size(); j++) {
+			// get line
+			String line = lines.get(j);
+			// decide concatenate or skip
+			if (pastheaders == true) {
+				text = text + " " + line;
+			} else if (line.length() == 0) {
+				// past the headers finally? = empty line
+				pastheaders = true;
+			} else {
+				// skip header line
+			}
+		}
+		// -- split words
+		String[] split = text.split("\\s+");
+		ArrayList<String> words = new ArrayList<String>();
+		for (int j = 0; j < split.length; j ++) {
+			// get current word
+			String out = split[j];
+			// remove useless characters
+			out = out.replace(",", "");
+			out = out.replace(".", "");
+			out = out.replace(":", "");
+			out = out.replace(";", "");
+			out = out.replace("-", "");
+			out = out.replace("_", "");
+			out = out.replace("\"", "");
+			out = out.replace("'", "");
+			out = out.replace("\\", "");
+			out = out.replace("/", "");
+			out = out.replace("<", "");
+			out = out.replace(">", "");
+			out = out.replace("@", "");
+			out = out.replace("!", "");
+			out = out.replace("?", "");
+			out = out.replace("(", "");
+			out = out.replace(")", "");
+			out = out.replace("{", "");
+			out = out.replace("}", "");
+			out = out.replace("[", "");
+			out = out.replace("]", "");
+			out = out.replace("*", "");
+			out = out.replace("$", "");
+			out = out.replace("|", "");
+			out = out.replace("%", "");
+			out = out.replace("+", "");
+			out = out.replace("NOT", "");
+			// if still has stuff remaining, put it into query words
+			if (out.length() > 0) {
+				words.add(out);
+			}
+		}
+		// -- concatenate to query string
+		String querystr = "";
+		for (int j = 0; j < words.size(); j++) {
+			querystr += "contents:" + words.get(j) + " ";
+		}
+		//System.out.println("Topic query string:" + querystr);
+		queryString = querystr;
+		//if (i < finder.foundFiles.size()) { continue; }
+		// search for this topic
+	    IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(index)));
+	    IndexSearcher searcher = new IndexSearcher(reader);
+	    Similarity sim = null;
+	    if ("bm25".equals(similarity)) {
+	    	sim = new BM25Similarity();
+	    	experimentNo = 1;
+	    	System.out.println("DEBUG: Selected similarity: BM25 vanilla (experiment 1)");
+	    } else if ("bm25l".equals(similarity)) {
+	    	sim = new BM25LSimilarity();
+	    	experimentNo = 2;
+	    	System.out.println("DEBUG: Selected similarity: BM25L modified (experiment 2)");
+	    } else {
+	    	System.err.println("ERROR: unexpected similarity: " + similarity);
+	    	System.exit(1);
+	    }
+	    searcher.setSimilarity(sim);
+	    // :Post-Release-Update-Version.LUCENE_XY:
+	    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_47);
+	
+	    BufferedReader in = null;
+	    if (queries != null) {
+	      in = new BufferedReader(new InputStreamReader(new FileInputStream(queries), "UTF-8"));
+	    } else {
+	      in = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
+	    }
+	    // :Post-Release-Update-Version.LUCENE_XY:
+	    QueryParser parser = new QueryParser(Version.LUCENE_47, field, analyzer);
+	    while (true) {
+	      if (queries == null && queryString == null) {                        // prompt the user
+	        System.out.println("Enter query: ");
+	      }
+	
+	      String line = queryString != null ? queryString : in.readLine();
+	
+	      if (line == null || line.length() == -1) {
+	        break;
+	      }
+	
+	      line = line.trim();
+	      if (line.length() == 0) {
+	        break;
+	      }
+	      
+	      Query query = parser.parse(line);
+	      System.out.println("Searching for: " + query.toString(field));
+	            
+	      if (repeat > 0) {                           // repeat & time as benchmark
+	        Date start = new Date();
+	        for (int j = 0; j < repeat; j++) {
+	          searcher.search(query, null, 100);
+	        }
+	        Date end = new Date();
+	        System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");	//DEBUG
+	      }
+	
+	      int topicNo = i;
+	      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, topicNo, experimentNo);
+	
+	      if (queryString != null) {
+	        break;
+	      }
+	    }
+	    reader.close();
+  	}
   }
 
   /**
@@ -217,7 +333,6 @@ public class SearchFiles {
         } else {
           System.out.println((i+1) + ". " + "No path for this document");
         }
-                  
       }
 
       if (!interactive || end == 0) {
@@ -264,4 +379,6 @@ public class SearchFiles {
       }
     }
   }
+
+
 }
