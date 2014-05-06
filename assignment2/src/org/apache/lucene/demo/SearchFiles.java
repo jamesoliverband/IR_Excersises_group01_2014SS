@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class SearchFiles {
       System.out.println(usage);
       System.exit(0);
     }
-
+    
     String index = "index";
     String field = "contents";
     String queries = null;
@@ -69,6 +70,7 @@ public class SearchFiles {
     int hitsPerPage = 10;
     String topicsDir = ".";
     String similarity = "bm25";
+    boolean debug = false;
     
     for(int i = 0;i < args.length;i++) {
       if ("-index".equals(args[i])) {
@@ -97,7 +99,7 @@ public class SearchFiles {
         i++;
       } else if ("-topicsdir".equals(args[i])) {
     	  topicsDir = args[i+1];
-    	  System.out.println("DEBUG: Topics directory is " + topicsDir);
+    	  if (debug) { System.out.println("DEBUG: Topics directory is " + topicsDir); }
       } else if ("-sim".equals(args[i])) {
     	  similarity = args[i+1];
     	  if ("bm25".equals(similarity) || "bm25l".equals(similarity)) {
@@ -106,10 +108,15 @@ public class SearchFiles {
     		  System.err.println("ERROR: allowed values for -similarity: bm25, bm25l");
     		  System.exit(1);
     	  }
+      } else if ("-debug".equals(args[i])){
+    	  debug = true;
+      } else if ("-out".equals(args[i])) {
+    	  String outfile = args[i+1];
+    	  System.out.println("Writing result output to " + outfile);
+    	  System.setOut(new PrintStream(new File(outfile)));
       }
     }
     
-    //TODO first with BM25, then run again with BM25L 
 	// get file list
 	// source:
 	// http://stackoverflow.com/questions/2056221/recursively-list-files-in-java
@@ -119,14 +126,15 @@ public class SearchFiles {
 	// http://www.riedquat.de/blog/2011-02-26-01
 	OurFinder finder = new OurFinder();
 	Files.walkFileTree(new File(topicsDir).toPath(), finder);	//Paths.get( System.getProperty( "user.home" ) )
-	System.out.format("Found %d topics to search for.\n", finder.foundFiles.size());
-	System.out.println("Searching...");
+	if (debug) { System.out.format("Found %d topics to search for.\n", finder.foundFiles.size()); }
+	if (debug) { System.out.println("Searching..."); }
 	// search for all topics
     int experimentNo = 0;
 	for (int i=0; i < finder.foundFiles.size(); i++) {
 		// get file
 		File topic = finder.foundFiles.get(i);
-		System.out.println("Current topic: " + topic.getAbsolutePath());
+		String topicName = topic.getName();
+		if (debug) { System.out.println("Current topic: " + topic.getAbsolutePath()); }
 		// generate documentId
 		/*
 		String lastpath = file.getParentFile().getName();
@@ -207,11 +215,11 @@ public class SearchFiles {
 	    if ("bm25".equals(similarity)) {
 	    	sim = new BM25Similarity();
 	    	experimentNo = 1;
-	    	System.out.println("DEBUG: Selected similarity: BM25 vanilla (experiment 1)");
+	    	if (debug) { System.out.println("DEBUG: Selected similarity: BM25 vanilla (experiment 1)"); }
 	    } else if ("bm25l".equals(similarity)) {
 	    	sim = new BM25LSimilarity();
 	    	experimentNo = 2;
-	    	System.out.println("DEBUG: Selected similarity: BM25L modified (experiment 2)");
+	    	if (debug) { System.out.println("DEBUG: Selected similarity: BM25L modified (experiment 2)"); }
 	    } else {
 	    	System.err.println("ERROR: unexpected similarity: " + similarity);
 	    	System.exit(1);
@@ -245,7 +253,7 @@ public class SearchFiles {
 	      }
 	      
 	      Query query = parser.parse(line);
-	      System.out.println("Searching for: " + query.toString(field));
+	      if (debug) { System.out.println("Searching for: " + query.toString(field)); }
 	            
 	      if (repeat > 0) {                           // repeat & time as benchmark
 	        Date start = new Date();
@@ -253,11 +261,12 @@ public class SearchFiles {
 	          searcher.search(query, null, 100);
 	        }
 	        Date end = new Date();
-	        System.out.println("Time: "+(end.getTime()-start.getTime())+"ms");	//DEBUG
+	        if (debug) { System.out.println("Time: "+(end.getTime()-start.getTime())+"ms"); }
 	      }
 	
-	      int topicNo = i;
-	      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, topicNo, experimentNo);
+	      //int topicNo = i + 1;
+	      //doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, topicNo, experimentNo, debug);
+	      doPagingSearch(in, searcher, query, hitsPerPage, raw, queries == null && queryString == null, topicName, experimentNo, debug);
 	
 	      if (queryString != null) {
 	        break;
@@ -278,14 +287,14 @@ public class SearchFiles {
    * 
    */
   public static void doPagingSearch(BufferedReader in, IndexSearcher searcher, Query query, 
-                                     int hitsPerPage, boolean raw, boolean interactive, int topicNo, int experimentNo) throws IOException {
+                                     int hitsPerPage, boolean raw, boolean interactive, String topicName, int experimentNo, boolean debug) throws IOException {
  
     // Collect enough docs to show 5 pages
     TopDocs results = searcher.search(query, 5 * hitsPerPage);
     ScoreDoc[] hits = results.scoreDocs;
     
     int numTotalHits = results.totalHits;
-    System.out.println(numTotalHits + " total matching documents");	//DEBUG
+    if (debug) { System.out.println(numTotalHits + " total matching documents"); }
 
     int start = 0;
     int end = Math.min(numTotalHits, hitsPerPage);
@@ -316,7 +325,8 @@ public class SearchFiles {
           // output result
           //System.out.println((i+1) + ". " + path);
           // output format: topic Q0 document-id rank score run-name
-          String topic = "topic" + Integer.valueOf(topicNo).toString();
+          //String topic = "topic" + Integer.valueOf(topicNo).toString();
+          String topic = topicName;
           String Q0 = "Q0";
           File f = new File(path);
           String documentId = f.getParentFile().getName() + "/" + f.getName();	// eg. misc.forsale/76050

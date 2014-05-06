@@ -5,7 +5,9 @@ Index generieren:
 	-docs c:\ir-20newsgroups -index c:\ir-index-lucene-vanilla
 
 Index durchsuchen:
-	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir c:\ir-20topics -sim bm25l
+	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir c:\ir-20topics -sim bm25l -out c:\ir-search-bm25.txt
 	Parameter -sim entweder "bm25" oder "bm25l"
-	Parameter "-raw" zeigt auch die Bewertung (Score) an
+	Parameter -debug zeigt mehr Details an (Pfade, Suchanfrage, etc.)
+	Parameter -out schreibt die Ausgabe in eine Datei für trec_eval
+	Parameter -raw zeigt auch die Bewertung (Score) an
 	keine Ahnung was Parameter "-field" und "-repeat" machen
