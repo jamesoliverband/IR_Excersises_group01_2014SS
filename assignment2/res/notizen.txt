@@ -5,5 +5,7 @@ Index generieren:
 	-docs c:\ir-20newsgroups -index c:\ir-index-lucene-vanilla
 
 Index durchsuchen:
-	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10
-	Parameter "-raw" zeigt auch die Bewertung (Score) an, keine Ahnung was -field und -repeat macht
+	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir c:\ir-20topics -sim bm25l
+	Parameter -sim entweder "bm25" oder "bm25l"
+	Parameter "-raw" zeigt auch die Bewertung (Score) an
+	keine Ahnung was Parameter "-field" und "-repeat" machen
