@@ -12,7 +12,7 @@ Index durchsuchen:
 	-index c:\data\ir\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir C:\data\ir\topics -out c:\data\ir\ir-search-default.txt
 	-index c:\data\ir\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir C:\data\ir\topics -sim bm25 -out c:\data\ir\ir-search-bm25.txt
 	-index c:\data\ir\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir C:\data\ir\topics -sim bm25l -out c:\data\ir\ir-search-bm25l.txt
-	Parameter -sim entweder "bm25" oder "bm25l"
+	Parameter -sim entweder "bm25" oder "bm25l", fehlt Parameter wird Lucene default similarity verwendet
 	Parameter -debug zeigt mehr Information an
 	Parameter -out schreibt alle stdout-Ausgabe in die angegebene Datei 
 	Parameter -raw zeigt auch die Bewertung (Score) an

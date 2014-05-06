@@ -224,6 +224,8 @@ public class SearchFiles {
 	    	if (debug) { System.out.println("DEBUG: Selected similarity: BM25L modified (experiment 2)"); }
 		    searcher.setSimilarity(sim);
 	    } else if ("default".equals(similarity)) {
+	    	if (debug) { System.out.println("DEBUG: Selected similarity: Lucene default similarity (experiment 3)"); }
+	    	experimentNo = 3;
 	    	//nothing to do
 	    } else {
 	    	System.err.println("ERROR: unexpected similarity: " + similarity);
