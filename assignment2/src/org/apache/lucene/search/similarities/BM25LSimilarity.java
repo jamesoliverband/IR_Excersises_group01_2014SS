@@ -39,7 +39,20 @@ public class BM25LSimilarity extends Similarity {
   private final float k1;
   private final float b;
   // TODO: should we add a delta like sifaka.cs.uiuc.edu/~ylv2/pub/sigir11-bm25l.pdf ?
+  private float delta;
 
+
+  /**
+   * BM25 with the supplied parameter values.
+   * @param k1 Controls non-linear term frequency normalization (saturation).
+   * @param b Controls to what degree document length normalizes tf values.
+   */
+  public BM25LSimilarity(float k1, float b, float delta) {
+    this.k1 = k1;
+    this.b  = b;
+    this.delta = delta;
+  }
+  
   /**
    * BM25 with the supplied parameter values.
    * @param k1 Controls non-linear term frequency normalization (saturation).
@@ -48,6 +61,7 @@ public class BM25LSimilarity extends Similarity {
   public BM25LSimilarity(float k1, float b) {
     this.k1 = k1;
     this.b  = b;
+    this.delta = 0.5f;
   }
   
   /** BM25 with these default values:
@@ -59,6 +73,7 @@ public class BM25LSimilarity extends Similarity {
   public BM25LSimilarity() {
     this.k1 = 1.2f;
     this.b  = 0.75f;
+    this.delta = 0.5f;
   }
   
   /** Implemented as <code>log(1 + (numDocs - docFreq + 0.5)/(docFreq + 0.5))</code>. */
@@ -309,7 +324,7 @@ public class BM25LSimilarity extends Similarity {
     tfNormExpl.addDetail(new Explanation(k1, "parameter k1"));
     if (norms == null) {
       tfNormExpl.addDetail(new Explanation(0, "parameter b (norms omitted for field)"));
-      tfNormExpl.setValue((freq.getValue() * (k1 + 1)) / (freq.getValue() + k1));
+      tfNormExpl.setValue(((freq.getValue()+delta) * (k1 + 1)) / ((freq.getValue()+delta) + k1));
     } else {
       float doclen = decodeNormValue((byte)norms.get(doc));
       tfNormExpl.addDetail(new Explanation(b, "parameter b"));
