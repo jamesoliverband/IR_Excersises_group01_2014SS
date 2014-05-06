@@ -3,7 +3,6 @@ Einbinden von Lucene -> Eclipse
 
 Index generieren:
 	-docs c:\ir-20newsgroups -index c:\ir-index-lucene-vanilla
-
 	-docs C:\data\ir\20_newsgroups_subset -index c:\data\ir\ir-index-lucene-vanilla
 
 Index durchsuchen:
@@ -13,6 +12,6 @@ Index durchsuchen:
 	-index c:\data\ir\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir C:\data\ir\topics -sim bm25l -out c:\data\ir\ir-search-bm25l.txt
 	Parameter -sim entweder "bm25" oder "bm25l"
 	Parameter -debug zeigt mehr Information an
-	Parameter -
+	Parameter -out schreibt alle stdout-Ausgabe in die angegebene Datei 
 	Parameter -raw zeigt auch die Bewertung (Score) an
 	keine Ahnung was Parameter "-field" und "-repeat" machen
