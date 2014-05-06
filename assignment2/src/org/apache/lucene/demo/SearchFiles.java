@@ -69,7 +69,7 @@ public class SearchFiles {
     String queryString = null;
     int hitsPerPage = 10;
     String topicsDir = ".";
-    String similarity = "bm25";
+    String similarity = "default";
     boolean debug = false;
     
     for(int i = 0;i < args.length;i++) {
@@ -217,15 +217,18 @@ public class SearchFiles {
 	    	sim = new BM25Similarity();
 	    	experimentNo = 1;
 	    	if (debug) { System.out.println("DEBUG: Selected similarity: BM25 vanilla (experiment 1)"); }
+		    searcher.setSimilarity(sim);
 	    } else if ("bm25l".equals(similarity)) {
 	    	sim = new BM25LSimilarity();
 	    	experimentNo = 2;
 	    	if (debug) { System.out.println("DEBUG: Selected similarity: BM25L modified (experiment 2)"); }
+		    searcher.setSimilarity(sim);
+	    } else if ("default".equals(similarity)) {
+	    	//nothing to do
 	    } else {
 	    	System.err.println("ERROR: unexpected similarity: " + similarity);
 	    	System.exit(1);
 	    }
-	    searcher.setSimilarity(sim);
 	    // :Post-Release-Update-Version.LUCENE_XY:
 	    Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_47);
 	

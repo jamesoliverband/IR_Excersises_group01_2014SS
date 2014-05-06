@@ -6,8 +6,10 @@ Index generieren:
 	-docs C:\data\ir\20_newsgroups_subset -index c:\data\ir\ir-index-lucene-vanilla
 
 Index durchsuchen:
+	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir c:\ir-20topics -out c:\ir-search-default.txt
 	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir c:\ir-20topics -sim bm25 -out c:\ir-search-bm25.txt
 	-index c:\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir c:\ir-20topics -sim bm25l -out c:\ir-search-bm25l.txt
+	-index c:\data\ir\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir C:\data\ir\topics -out c:\data\ir\ir-search-default.txt
 	-index c:\data\ir\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir C:\data\ir\topics -sim bm25 -out c:\data\ir\ir-search-bm25.txt
 	-index c:\data\ir\ir-index-lucene-vanilla -field 1 -repeat 1 -query contents:camera -paging 10 -topicsdir C:\data\ir\topics -sim bm25l -out c:\data\ir\ir-search-bm25l.txt
 	Parameter -sim entweder "bm25" oder "bm25l"
